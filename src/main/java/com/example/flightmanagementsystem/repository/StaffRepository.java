@@ -1,4 +1,6 @@
 package com.example.flightmanagementsystem.repository;
 
-public class StaffRepository {
+import com.example.flightmanagementsystem.model.Staff;
+
+public class StaffRepository extends InMemoryRepository<Staff> {
 }

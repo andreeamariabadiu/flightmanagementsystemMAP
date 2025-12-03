@@ -1,4 +1,5 @@
 package com.example.flightmanagementsystem.repository;
 
-public class TicketRepository {
-}
+import com.example.flightmanagementsystem.model.Ticket;
+
+public class TicketRepository extends InMemoryRepository<Ticket> {}
