@@ -5,6 +5,7 @@ import com.example.flightmanagementsystem.model.Identifiable;
 import java.util.*;
 
 public class InMemoryRepository<T extends Identifiable> implements BaseRepository<T> {
+
     protected final Map<String, T> storage = new HashMap<>();
 
     @Override
