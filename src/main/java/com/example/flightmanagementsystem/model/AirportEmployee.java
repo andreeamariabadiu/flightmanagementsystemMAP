@@ -13,6 +13,9 @@ public class AirportEmployee extends Staff implements Identifiable{
         this.department = department;
     }
 
+    public AirportEmployee() {}
+
+
     // getters and setters
 
     @Override
