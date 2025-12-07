@@ -11,6 +11,8 @@ public class FlightAssignment implements Identifiable{
         this.staffId = staffId;
     }
 
+    public FlightAssignment() {}
+
     //getters and setters
 
     @Override
