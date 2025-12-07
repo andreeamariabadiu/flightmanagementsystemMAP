@@ -17,7 +17,6 @@ public class FlightController {
 
     private final FlightService flightService;
 
-    // Formatter for <input type="datetime-local">
     private static final DateTimeFormatter FORM_FMT =
             DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm");
 
@@ -25,23 +24,21 @@ public class FlightController {
         this.flightService = flightService;
     }
 
-    // 1) List all flights
+    // List all flights
     @GetMapping
     public String listFlights(Model model) {
         model.addAttribute("flights", flightService.findAll());
-        // looks for src/main/resources/templates/flight/index.html
         return "flight/index";
     }
 
-    // 2) Show empty form to create a new flight
+    // Show empty form to create a new flight
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("flight", new Flight());
-        // looks for templates/flight/form.html
         return "flight/form";
     }
 
-    // 3) Handle form submission and create a flight
+    // Handle form submission and create a flight
     @PostMapping
     public String createFlight(
             @RequestParam String id,
@@ -63,6 +60,7 @@ public class FlightController {
         return "redirect:/flights";
     }
 
+    // Delete a flight
     @PostMapping("/{id}/delete")
     public String deleteFlight(@PathVariable String id) {
         flightService.delete(id);

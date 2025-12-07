@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Airline Employees | Flight Management System</title>
+
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            min-height: 100vh;
+            color: #e5e7eb;
+        }
+        .navbar-brand { font-weight: 700; letter-spacing: 0.06em; }
+        .page-wrapper { padding-top: 4rem; padding-bottom: 4rem; }
+        .card-main {
+            background-color: #020617;
+            border-radius: 18px;
+            border: 1px solid rgba(148,163,184,0.3);
+            box-shadow: 0 24px 60px rgba(15,23,42,0.8);
+        }
+        .table thead { background: rgba(15,23,42,0.8); }
+        .role-pill {
+            padding: .20rem .75rem;
+            border-radius: 999px;
+            font-size: .75rem;
+            text-transform: uppercase;
+        }
+        .role-PILOT { background: rgba(59,130,246,.2); color: #60a5fa; }
+        .role-COPILOT { background: rgba(234,179,8,.2); color: #facc15; }
+        .role-STEWARD { background: rgba(248,113,113,.2); color: #fca5a5; }
+        .badge-id {
+            background: rgba(15,23,42,.9);
+            border: 1px solid rgba(148,163,184,.6);
+        }
+    </style>
+</head>
+<body>
+
+<nav class="navbar navbar-dark bg-transparent px-4 pt-3">
+    <a class="navbar-brand" href="#" style="font-size: 1.1rem;">
+        👨‍✈️ Airline Employees
+    </a>
+</nav>
+
+<div class="container page-wrapper">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card card-main">
+                <div class="card-header d-flex justify-content-between align-items-center border-0 pb-0 pt-4 px-4">
+                    <div>
+                        <h3 class="mb-1 text-light">Employee Overview</h3>
+                        <p class="text-muted mb-0" style="font-size: 0.9rem;">
+                            Manage your entire airline workforce here.
+                        </p>
+                    </div>
+                    <a href="/airline-employees/new" class="btn btn-primary btn-sm">
+                        + New Employee
+                    </a>
+                </div>
+
+                <div class="card-body px-4 pb-4 pt-3">
+                    <div th:if="${#lists.isEmpty(flights)}" class="text-center text-muted py-4">
+                        No employees yet. Click <strong>“New Employee”</strong> to add one.
+                    </div>
+
+                    <div th:if="${!#lists.isEmpty(flights)}" class="table-responsive">
+                        <table class="table table-dark table-borderless align-middle mb-0">
+                            <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Role</th>
+                                <th>License #</th>
+                                <th>Registration Date</th>
+                                <th>Assignments</th>
+                                <th class="text-end">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="emp : ${flights}">
+                                <td>
+                                    <div class="d-flex flex-column">
+                                        <span th:text="${emp.name}" class="fw-semibold"></span>
+                                        <span class="badge badge-id mt-1"
+                                              style="font-size:.7rem;"
+                                              th:text="'ID: ' + ${emp.id}">
+                                        </span>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="role-pill"
+                                          th:classappend="' role-' + ${emp.role}"
+                                          th:text="${emp.role}">
+                                    </span>
+                                </td>
+                                <td><span th:text="${emp.licenseNumber}"></span></td>
+                                <td>
+                                    <span th:text="${emp.registrationDate != null ?
+                                         #temporals.format(emp.registrationDate,'yyyy-MM-dd') : '-'}">
+                                    </span>
+                                </td>
+                                <td>
+                                    <small th:text="${#lists.isEmpty(emp.assignments) ? '-' : #strings.listJoin(emp.assignments, ', ')}"></small>
+                                </td>
+                                <td class="text-end">
+                                    <form th:action="@{'/airline-employees/' + ${emp.id} + '/delete'}"
+                                          method="post"
+                                          style="display:inline;">
+                                        <button type="submit" class="btn btn-outline-danger btn-sm"
+                                                onclick="return confirm('Delete this employee?');">
+                                            Delete
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

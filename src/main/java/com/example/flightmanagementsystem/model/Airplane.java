@@ -13,6 +13,8 @@ public class Airplane implements Identifiable{
         this.flights = flights;
     }
 
+    public Airplane() {}
+
     // getterss and setters
 
     @Override

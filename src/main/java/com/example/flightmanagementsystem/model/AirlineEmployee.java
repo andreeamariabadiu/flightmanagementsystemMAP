@@ -4,8 +4,9 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
-public abstract class AirlineEmployee extends Staff implements Identifiable {
-    private String airlineEmployeeId;
+public class AirlineEmployee extends Staff implements Identifiable {
+    private String id;
+    private String name;
     private List<String> assignments = new ArrayList<>();;
     private Role role;
     private String licenseNumber;
@@ -13,23 +14,30 @@ public abstract class AirlineEmployee extends Staff implements Identifiable {
 
     public AirlineEmployee() {}
 
-    public AirlineEmployee(String id, String name, String employeeId, List assignments, Role role) {
-        super(id, name);
-        this.airlineEmployeeId = employeeId;
+    public AirlineEmployee(String id, String name, List assignments, Role role, String licenseNumber, LocalDate registrationDate) {
+        this.id = id;
+        this.name = name;
         this.assignments = assignments;
         this.role = role;
+        this.licenseNumber = licenseNumber;
+        this.registrationDate = registrationDate;
     }
 
 
     // getters and setters
-
-    public String getAirlineEmployeeId() {
-        return airlineEmployeeId;
+    @Override
+    public String getId() {
+        return id;
     }
 
-    public void setAirlineEmployeeId(String airlineEmployeeId) {
-        this.airlineEmployeeId = airlineEmployeeId;
+    @Override
+    public void setId(String airlineEmployeeId) {
+        this.id = airlineEmployeeId;
     }
+
+    public String getName() { return name; }
+
+    public void setName(String name) { this.name = name; }
 
     public List<String> getAssignments() {
         return assignments;
