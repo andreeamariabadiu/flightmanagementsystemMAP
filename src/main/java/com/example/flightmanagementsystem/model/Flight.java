@@ -1,6 +1,7 @@
 package com.example.flightmanagementsystem.model;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -11,24 +12,29 @@ public class Flight implements Identifiable{
     private String AirplaneId;
     private List<String> tickets = new ArrayList<>(); // Ticket IDs
     private List<String> flightAssignments = new ArrayList<>(); // flight assignment IDs
-    private LocalDate departureTime;
-    private LocalDate arrivalTime;
+    private LocalDateTime departureTime;
+    private LocalDateTime arrivalTime;
     private Status status;
 
-    public Flight(String id, String flightName, String NoticeBoardId, String AirplaneId, List tickets, List flightAssignments) {
+    public Flight(String id, String flightName, String NoticeBoardId, String AirplaneId, List tickets, List flightAssignments, LocalDateTime ArrivalTime, LocalDateTime departureTime, Status status) {
         this.id = id;
         this.flightName = flightName;
         this.NoticeBoardId = NoticeBoardId;
         this.AirplaneId = AirplaneId;
         this.tickets = tickets;
         this.flightAssignments = flightAssignments;
+        this.arrivalTime = ArrivalTime;
+        this.departureTime = departureTime;
+        this.status = status;
     }
+
+    public Flight() {}
 
     // getters and setters
 
     @Override
     public String getId() {
-        return "";
+        return id;
     }
 
     @Override
@@ -71,19 +77,19 @@ public class Flight implements Identifiable{
         this.flightAssignments = flightAssignments;
     }
 
-    public LocalDate getDepartureTime() {
+    public LocalDateTime getDepartureTime() {
         return departureTime;
     }
 
-    public void setDepartureTime(LocalDate departureTime) {
+    public void setDepartureTime(LocalDateTime departureTime) {
         this.departureTime = departureTime;
     }
 
-    public LocalDate getArrivalTime() {
+    public LocalDateTime getArrivalTime() {
         return arrivalTime;
     }
 
-    public void setArrivalTime(LocalDate arrivalTime) {
+    public void setArrivalTime(LocalDateTime arrivalTime) {
         this.arrivalTime = arrivalTime;
     }
 

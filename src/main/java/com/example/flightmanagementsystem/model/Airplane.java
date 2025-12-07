@@ -17,7 +17,7 @@ public class Airplane implements Identifiable{
 
     @Override
     public String getId() {
-        return "";
+        return id;
     }
 
     @Override
