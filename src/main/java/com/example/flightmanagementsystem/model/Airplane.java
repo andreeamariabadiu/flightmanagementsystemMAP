@@ -1,9 +1,19 @@
 package com.example.flightmanagementsystem.model;
+import jakarta.persistence.Entity;
+import jakarta.persistence.*;
+import jakarta.persistence.Table;
+
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "AIRPPLANES")
 public class Airplane implements Identifiable{
+
+    @Id
     private String id;
+
+    
     private int airplaneNumber;
     private List<String> flights = new ArrayList<>();// Flight IDs
 
