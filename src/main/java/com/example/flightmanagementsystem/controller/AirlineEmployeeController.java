@@ -68,15 +68,18 @@ public class AirlineEmployeeController {
     //update airline employee form
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable String id, Model model) {
-        model.addAttribute("airlineEmployee", airlineEmployeeService.findById(id));
+        AirlineEmployee emp = airlineEmployeeService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
+        model.addAttribute("airlineEmployee", emp);
         return "airlineemployees/form";
     }
 
     //show details page
     @GetMapping("/{id}/details")
     public String showDetails(@PathVariable String id, Model model) {
-        model.addAttribute("airlineEmployee", airlineEmployeeService.findById(id));
+        AirlineEmployee emp = airlineEmployeeService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
+        model.addAttribute("airlineEmployee", emp);
         return "airlineemployees/details";
     }
-
 }

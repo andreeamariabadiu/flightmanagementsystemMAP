@@ -1,5 +1,6 @@
 package com.example.flightmanagementsystem.controller;
 
+import com.example.flightmanagementsystem.model.AirlineEmployee;
 import org.springframework.ui.Model;
 import com.example.flightmanagementsystem.model.Airplane;
 import com.example.flightmanagementsystem.service.AirplaneService;
@@ -50,17 +51,21 @@ public class AirplaneController {
         return "redirect:/airplanes";
     }
 
-    //update airplane form
+    //update airline employee form
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable String id, Model model) {
-        model.addAttribute("airplane", airplaneService.findById(id));
+        Airplane a = airplaneService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
+        model.addAttribute("airplane", a);
         return "airplane/form";
     }
 
     //show details page
     @GetMapping("/{id}/details")
     public String showDetails(@PathVariable String id, Model model) {
-        model.addAttribute("airplane", airplaneService.findById(id));
+        Airplane a = airplaneService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
+        model.addAttribute("airplane", a);
         return "airplane/details";
     }
 

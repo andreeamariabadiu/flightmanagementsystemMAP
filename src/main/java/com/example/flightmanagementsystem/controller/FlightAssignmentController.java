@@ -1,5 +1,6 @@
 package com.example.flightmanagementsystem.controller;
 
+import com.example.flightmanagementsystem.model.AirlineEmployee;
 import com.example.flightmanagementsystem.model.FlightAssignment;
 import com.example.flightmanagementsystem.service.FlightAssignmentService;
 import org.springframework.stereotype.Controller;
@@ -48,17 +49,21 @@ public class FlightAssignmentController {
         return "redirect:/flight-assignments";
     }
 
-    //update flight assignment form
+    //update airline employee form
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable String id, Model model) {
-        model.addAttribute("flightAssignment", flightAssignmentService.findById(id));
+        FlightAssignment fa = flightAssignmentService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
+        model.addAttribute("flightAssignment", fa);
         return "flightassignment/form";
     }
 
     //show details page
     @GetMapping("/{id}/details")
     public String showDetails(@PathVariable String id, Model model) {
-        model.addAttribute("flightAssignment", flightAssignmentService.findById(id));
+        FlightAssignment fa = flightAssignmentService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
+        model.addAttribute("flightAssignment", fa);
         return "flightassignment/details";
     }
 }

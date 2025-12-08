@@ -1,5 +1,6 @@
 package com.example.flightmanagementsystem.controller;
 
+import com.example.flightmanagementsystem.model.AirlineEmployee;
 import com.example.flightmanagementsystem.model.AirportEmployee;
 import com.example.flightmanagementsystem.model.Department;
 import com.example.flightmanagementsystem.model.Designation;
@@ -53,17 +54,21 @@ public class AirportEmployeeController {
         return "redirect:/airport-employees";
     }
 
-    //update airport employee form
+    //update airline employee form
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable String id, Model model) {
-        model.addAttribute("airportEmployee", airportEmployeeService.findById(id));
+        AirportEmployee emp = airportEmployeeService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
+        model.addAttribute("airportEmployee", emp);
         return "airportemployees/form";
     }
 
     //show details page
     @GetMapping("/{id}/details")
     public String showDetails(@PathVariable String id, Model model) {
-        model.addAttribute("airportEmployee", airportEmployeeService.findById(id));
+        AirportEmployee emp = airportEmployeeService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
+        model.addAttribute("airportEmployee", emp);
         return "airportemployees/details";
     }
 
