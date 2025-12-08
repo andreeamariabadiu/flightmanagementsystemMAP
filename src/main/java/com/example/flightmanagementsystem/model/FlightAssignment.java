@@ -1,8 +1,19 @@
 package com.example.flightmanagementsystem.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "flight_assignments")
 public class FlightAssignment implements Identifiable{
+
+    @Id
+    @Column(length = 64)
     public String id;
+
+    @Column(nullable = false)
     public String flightId;
+
+    @Column(nullable = false)
     public String staffId;
 
     public FlightAssignment(String id, String flightId, String staffId) {

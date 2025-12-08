@@ -1,8 +1,15 @@
 package com.example.flightmanagementsystem.model;
 
+import jakarta.persistence.*;
 
+@MappedSuperclass
 public abstract class Staff implements Identifiable {
+
+    @Id
+    @Column(length = 64)
     private String id;
+
+    @Column(nullable = false, length = 100)
     private String name;
 
     public Staff() {}

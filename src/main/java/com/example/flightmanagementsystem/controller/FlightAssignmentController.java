@@ -48,4 +48,17 @@ public class FlightAssignmentController {
         return "redirect:/flight-assignments";
     }
 
+    //update flight assignment form
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable String id, Model model) {
+        model.addAttribute("flightAssignment", flightAssignmentService.findById(id));
+        return "flightassignment/form";
+    }
+
+    //show details page
+    @GetMapping("/{id}/details")
+    public String showDetails(@PathVariable String id, Model model) {
+        model.addAttribute("flightAssignment", flightAssignmentService.findById(id));
+        return "flightassignment/details";
+    }
 }

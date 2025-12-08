@@ -50,5 +50,19 @@ public class AirplaneController {
         return "redirect:/airplanes";
     }
 
+    //update airplane form
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable String id, Model model) {
+        model.addAttribute("airplane", airplaneService.findById(id));
+        return "airplane/form";
+    }
+
+    //show details page
+    @GetMapping("/{id}/details")
+    public String showDetails(@PathVariable String id, Model model) {
+        model.addAttribute("airplane", airplaneService.findById(id));
+        return "airplane/details";
+    }
+
 
 }

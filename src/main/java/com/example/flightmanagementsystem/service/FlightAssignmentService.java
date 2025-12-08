@@ -20,7 +20,11 @@ public class FlightAssignmentService {
     }
 
     public boolean delete(String id) {
-        return flightAssignmentRepository.deleteById(id);
+        if (flightAssignmentRepository.existsById(id)) {
+            flightAssignmentRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     public List<FlightAssignment> findAll() {
@@ -31,4 +35,8 @@ public class FlightAssignmentService {
         return flightAssignmentRepository.findById(id);
     }
 
+    public void updateEmployee(String id, FlightAssignment update) {
+        update.setId(id);
+        flightAssignmentRepository.save(update);
+    }
 }

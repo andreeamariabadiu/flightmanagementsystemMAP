@@ -66,4 +66,18 @@ public class FlightController {
         flightService.delete(id);
         return "redirect:/flights";
     }
+
+    //update airplane form
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable String id, Model model) {
+        model.addAttribute("flight", flightService.findById(id));
+        return "flight/form";
+    }
+
+    //show details page
+    @GetMapping("/{id}/details")
+    public String showDetails(@PathVariable String id, Model model) {
+        model.addAttribute("flight", flightService.findById(id));
+        return "flight/details";
+    }
 }

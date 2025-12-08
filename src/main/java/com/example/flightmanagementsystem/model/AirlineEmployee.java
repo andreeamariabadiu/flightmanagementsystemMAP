@@ -1,22 +1,37 @@
 package com.example.flightmanagementsystem.model;
 
+import jakarta.persistence.*;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "airline_employees")
 public class AirlineEmployee extends Staff implements Identifiable {
-    private String id;
-    private String name;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "employee_assignments",
+            joinColumns = @JoinColumn(name = "employee_id")
+    )
+    @Column(name = "assignment")
     private List<String> assignments = new ArrayList<>();;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
+
+    @Column(nullable = false)
     private String licenseNumber;
+
+    @Column(nullable = false)
     private LocalDate registrationDate;
 
     public AirlineEmployee() {}
 
     public AirlineEmployee(String id, String name, List assignments, Role role, String licenseNumber, LocalDate registrationDate) {
-        this.id = id;
-        this.name = name;
+        super(id, name);
         this.assignments = assignments;
         this.role = role;
         this.licenseNumber = licenseNumber;
@@ -25,19 +40,6 @@ public class AirlineEmployee extends Staff implements Identifiable {
 
 
     // getters and setters
-    @Override
-    public String getId() {
-        return id;
-    }
-
-    @Override
-    public void setId(String airlineEmployeeId) {
-        this.id = airlineEmployeeId;
-    }
-
-    public String getName() { return name; }
-
-    public void setName(String name) { this.name = name; }
 
     public List<String> getAssignments() {
         return assignments;

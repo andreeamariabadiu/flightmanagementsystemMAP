@@ -22,7 +22,11 @@ public class AirlineEmployeeService {
     }
 
     public boolean delete(String id) {
-        return airlineEmployeeRepository.deleteById(id);
+        if (airlineEmployeeRepository.existsById(id)) {
+            airlineEmployeeRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     public List<AirlineEmployee> findAll() {
@@ -32,7 +36,5 @@ public class AirlineEmployeeService {
     public Optional<AirlineEmployee> findById(String id) {
         return airlineEmployeeRepository.findById(id);
     }
-
-
 
 }

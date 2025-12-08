@@ -28,7 +28,7 @@ public class AirlineEmployeeController {
     //list all airline employees
     @GetMapping
     public String listAirlineEmployees(Model model) {
-        model.addAttribute("flights", airlineEmployeeService.findAll());
+        model.addAttribute("airlineEmployees", airlineEmployeeService.findAll());
         return "airlineemployees/index";
     }
 
@@ -63,6 +63,20 @@ public class AirlineEmployeeController {
     public String deleteAirlineEmployee(@PathVariable String id) {
         airlineEmployeeService.delete(id);
         return "redirect:/airline-employees";
+    }
+
+    //update airline employee form
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable String id, Model model) {
+        model.addAttribute("airlineEmployee", airlineEmployeeService.findById(id));
+        return "airlineemployees/form";
+    }
+
+    //show details page
+    @GetMapping("/{id}/details")
+    public String showDetails(@PathVariable String id, Model model) {
+        model.addAttribute("airlineEmployee", airlineEmployeeService.findById(id));
+        return "airlineemployees/details";
     }
 
 }

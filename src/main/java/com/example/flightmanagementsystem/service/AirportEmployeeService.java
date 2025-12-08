@@ -1,5 +1,6 @@
 package com.example.flightmanagementsystem.service;
 
+import com.example.flightmanagementsystem.model.AirlineEmployee;
 import com.example.flightmanagementsystem.model.AirportEmployee;
 import com.example.flightmanagementsystem.repository.AirportEmployeeRepository;
 import org.springframework.stereotype.Service;
@@ -20,7 +21,11 @@ public class AirportEmployeeService {
     }
 
     public boolean delete(String id) {
-        return airportEmployeeRepository.deleteById(id);
+        if (airportEmployeeRepository.existsById(id)) {
+            airportEmployeeRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     public Optional<AirportEmployee> findById(String id) {
@@ -29,6 +34,11 @@ public class AirportEmployeeService {
 
     public List<AirportEmployee> findAll() {
         return airportEmployeeRepository.findAll();
+    }
+
+    public void updateEmployee(String id, AirportEmployee update) {
+        update.setId(id);
+        airportEmployeeRepository.save(update);
     }
 
 }

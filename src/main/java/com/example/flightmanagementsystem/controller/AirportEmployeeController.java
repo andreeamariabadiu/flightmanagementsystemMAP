@@ -53,6 +53,20 @@ public class AirportEmployeeController {
         return "redirect:/airport-employees";
     }
 
+    //update airport employee form
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable String id, Model model) {
+        model.addAttribute("airportEmployee", airportEmployeeService.findById(id));
+        return "airportemployees/form";
+    }
+
+    //show details page
+    @GetMapping("/{id}/details")
+    public String showDetails(@PathVariable String id, Model model) {
+        model.addAttribute("airportEmployee", airportEmployeeService.findById(id));
+        return "airportemployees/details";
+    }
+
 
 
 }

@@ -1,19 +1,54 @@
 package com.example.flightmanagementsystem.model;
 
+import jakarta.persistence.*;
+
+
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "flights")
 public class Flight implements Identifiable{
+
+    @Id
+    @Column(length = 64)
     private String id;
+
+    @Column(nullable = false)
     private String flightName;
+
+    @Column(nullable = false)
     private String NoticeBoardId;
+
+    @Column(nullable = false)
     private String AirplaneId;
+
+    @ElementCollection
+    @CollectionTable(
+            name = "flight_tickets",
+            joinColumns = @JoinColumn(name = "flight_id")
+    )
+    @Column(name = "ticket_id")
     private List<String> tickets = new ArrayList<>(); // Ticket IDs
+
+    @ElementCollection
+    @CollectionTable(
+            name = "flight_assignments_linksflight",
+            joinColumns = @JoinColumn(name = "flight_id")
+    )
+    @Column(name = "assignment_id")
     private List<String> flightAssignments = new ArrayList<>(); // flight assignment IDs
+
+    @Column(nullable = false)
     private LocalDateTime departureTime;
+
+    @Column(nullable = false)
     private LocalDateTime arrivalTime;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Status status;
 
     public Flight(String id, String flightName, String NoticeBoardId, String AirplaneId, List tickets, List flightAssignments, LocalDateTime ArrivalTime, LocalDateTime departureTime, Status status) {
