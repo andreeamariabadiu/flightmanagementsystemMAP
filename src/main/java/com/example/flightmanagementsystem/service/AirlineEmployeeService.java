@@ -39,8 +39,6 @@ public class AirlineEmployeeService {
     public void update(String id, AirlineEmployee update) {
         // Păstrăm referința la ID
         update.setId(id);
-        // ATENȚIE: Nu suprascriem lista de 'assignments' aici, JPA se ocupă de ea.
-        // Validăm doar datele scalare (nume, rol, licență)
         validateRules(update, id);
         repository.save(update);
     }

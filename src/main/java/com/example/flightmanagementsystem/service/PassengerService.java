@@ -33,8 +33,6 @@ public class PassengerService {
     public void updatePassenger(String id, Passenger updated) {
         validateBusinessRules(updated, id);
         updated.setId(id); // Păstrăm ID-ul original
-        // Notă: Lista de bilete nu se pierde, deoarece JPA face merge doar pe câmpurile modificate
-        // sau gestionează lista separat. Aici actualizăm datele personale.
         passengerRepository.save(updated);
     }
 

@@ -36,7 +36,7 @@
         }
 
         .date-text {
-            color: #fca5a5; /* Culoare distinctivă pentru dată */
+            color: #fca5a5; /* Culoare roșie-deschis pentru dată */
             font-weight: 600;
             font-size: 1rem;
         }
@@ -75,6 +75,61 @@
                 </div>
 
                 <div class="card-body px-4 pb-4 pt-3">
+
                     <div th:if="${#lists.isEmpty(noticeboards)}" class="text-center text-muted py-4">
                         No schedules created. Click <strong>“New Schedule”</strong> to add one.
                     </div>
+
+                    <div th:if="${!#lists.isEmpty(noticeboards)}" class="table-responsive">
+                        <table class="table table-dark table-borderless align-middle mb-0">
+                            <thead>
+                            <tr>
+                                <th scope="col" class="ps-3">Date</th>
+                                <th scope="col">Board ID</th>
+                                <th scope="col">Listed Flights</th>
+                                <th scope="col" class="text-end pe-3">Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr th:each="nb : ${noticeboards}">
+                                <td class="ps-3">
+                                    <span class="date-text">
+                                        🗓 <span th:text="${#temporals.format(nb.date, 'EEEE, dd MMMM yyyy')}"></span>
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="badge-id" th:text="${nb.id}"></span>
+                                </td>
+                                <td>
+                                    <span class="count-pill">
+                                        <span th:text="${nb.flightsOfTheDay != null ? nb.flightsOfTheDay.size() : 0}">0</span> Flights
+                                    </span>
+                                </td>
+
+                                <td class="text-end pe-3">
+                                    <div class="btn-group btn-group-sm">
+                                        <a th:href="@{'/noticeboards/' + ${nb.id} + '/details'}"
+                                           class="btn btn-outline-light">Details</a>
+                                        <a th:href="@{'/noticeboards/' + ${nb.id} + '/edit'}"
+                                           class="btn btn-outline-primary">Edit</a>
+                                        <form th:action="@{'/noticeboards/' + ${nb.id} + '/delete'}"
+                                              method="post" style="display:contents;">
+                                            <button type="submit" class="btn btn-outline-danger"
+                                                    onclick="return confirm('Delete this schedule?');">
+                                                Delete
+                                            </button>
+                                        </form>
+                                    </div>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div> </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
