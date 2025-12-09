@@ -2,28 +2,36 @@ package com.example.flightmanagementsystem.service;
 
 import com.example.flightmanagementsystem.model.Ticket;
 import com.example.flightmanagementsystem.repository.TicketRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
+@Service
 public class TicketService {
-    private final TicketRepository repo;
 
-    public TicketService(TicketRepository repo) { this.repo = repo; }
+    private final TicketRepository ticketRepository;
 
-    public Ticket create(String passengerId, String flightId, double price, String seatNumber) {
-        Ticket t = new Ticket();
-        t.setId(UUID.randomUUID().toString());
-        t.setPassengerId(passengerId);
-        t.setFlightId(flightId);
-        t.setPrice(price);
-        t.setSeatNumber(seatNumber);
-        return repo.save(t);
+    public TicketService(TicketRepository ticketRepository) {
+        this.ticketRepository = ticketRepository;
     }
 
-    public List<Ticket> findAll() { return repo.findAll(); }
-    public Optional<Ticket> findById(String id) { return repo.findById(id); }
-    public boolean delete(String id) { return repo.deleteById(id); }
-    public Ticket save(Ticket t) { return repo.save(t); }
+    public Ticket save(Ticket t) { return ticketRepository.save(t); }
+
+    public boolean delete(String id) {
+        if (ticketRepository.existsById(id)) {
+            ticketRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public List<Ticket> findAll() { return ticketRepository.findAll(); }
+
+    public Optional<Ticket> findById(String id) { return ticketRepository.findById(id); }
+
+    public void update(String id, Ticket updated) {
+        updated.setId(id);
+        ticketRepository.save(updated);
+    }
 }

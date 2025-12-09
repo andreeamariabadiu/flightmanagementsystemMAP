@@ -1,15 +1,36 @@
 package com.example.flightmanagementsystem.model;
 
+import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
+@Entity
+@Table(name = "tickets")
 public class Ticket implements Identifiable {
+
+    @Id
+    @Column(length = 64)
     private String id;
+
+    @Column(nullable = false)
     private String passengerId;
+
+    @Column(nullable = false)
     private String flightId;
+
+    @Column(nullable = false)
     private double price;
+
+    @Column(nullable = false)
     private String seatNumber;
-    private List<String> luggages = new ArrayList<>(); // Luggage IDs
+
+    @ElementCollection
+    @CollectionTable(
+            name = "ticket_luggages",
+            joinColumns = @JoinColumn(name = "ticket_id")
+    )
+    @Column(name = "luggage_id")
+    private List<String> luggages = new ArrayList<>();
 
     public Ticket() {}
 
@@ -21,8 +42,11 @@ public class Ticket implements Identifiable {
         this.seatNumber = seatNumber;
     }
 
-    @Override public String getId() { return id; }
-    @Override public void setId(String id) { this.id = id; }
+    @Override
+    public String getId() { return id; }
+
+    @Override
+    public void setId(String id) { this.id = id; }
 
     public String getPassengerId() { return passengerId; }
     public void setPassengerId(String passengerId) { this.passengerId = passengerId; }

@@ -1,41 +1,83 @@
 package com.example.flightmanagementsystem.controller;
 
 import com.example.flightmanagementsystem.model.Ticket;
-import com.example.flightmanagementsystem.repository.TicketRepository;
 import com.example.flightmanagementsystem.service.TicketService;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/tickets")
 public class TicketController {
-    private final TicketService service;
 
-    public TicketController() {
-        this.service = new TicketService(new TicketRepository());
-    }
+    private final TicketService ticketService;
 
-    @PostMapping
-    @ResponseBody
-    public Ticket create(@RequestParam String passengerId,
-                         @RequestParam String flightId,
-                         @RequestParam double price,
-                         @RequestParam String seatNumber) {
-        return service.create(passengerId, flightId, price, seatNumber);
+    public TicketController(TicketService ticketService) {
+        this.ticketService = ticketService;
     }
 
     @GetMapping
-    @ResponseBody
-    public List<Ticket> findAll() { return service.findAll(); }
+    public String listTickets(Model model) {
+        model.addAttribute("tickets", ticketService.findAll());
+        return "ticket/index";
+    }
 
-    @GetMapping("/{id}")
-    @ResponseBody
-    public Optional<Ticket> findById(@PathVariable String id) { return service.findById(id); }
+    @GetMapping("/new")
+    public String showCreateForm(Model model) {
+        model.addAttribute("ticket", new Ticket());
+        return "ticket/form";
+    }
 
-    @DeleteMapping("/{id}")
-    @ResponseBody
-    public boolean delete(@PathVariable String id) { return service.delete(id); }
+    @PostMapping
+    public String createTicket(
+            @RequestParam String id,
+            @RequestParam String passengerId,
+            @RequestParam String flightId,
+            @RequestParam double price,
+            @RequestParam String seatNumber,
+            @RequestParam(required = false) String luggages
+    ) {
+        Ticket t = new Ticket(id, passengerId, flightId, price, seatNumber);
+
+        if (luggages != null && !luggages.isBlank()) {
+            List<String> list = Arrays.stream(luggages.split(","))
+                    .map(String::trim)
+                    .filter(s -> !s.isEmpty())
+                    .collect(Collectors.toList());
+            t.setLuggages(list);
+        }
+
+        ticketService.save(t);
+        return "redirect:/tickets";
+    }
+
+    @PostMapping("/{id}/delete")
+    public String deleteTicket(@PathVariable String id) {
+        ticketService.delete(id);
+        return "redirect:/tickets";
+    }
+
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable String id, Model model) {
+        Ticket t = ticketService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ticket ID " + id));
+
+        model.addAttribute("ticket", t);
+        model.addAttribute("luggagesCsv", String.join(", ", t.getLuggages()));
+
+        return "ticket/form";
+    }
+
+    @GetMapping("/{id}/details")
+    public String showDetails(@PathVariable String id, Model model) {
+        Ticket t = ticketService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ticket ID " + id));
+
+        model.addAttribute("ticket", t);
+        return "ticket/details";
+    }
 }

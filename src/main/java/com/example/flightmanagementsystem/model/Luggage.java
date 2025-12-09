@@ -1,8 +1,20 @@
 package com.example.flightmanagementsystem.model;
 
+import jakarta.persistence.*;
+
+@Entity
+@Table(name = "luggages")
 public class Luggage implements Identifiable {
+
+    @Id
+    @Column(length = 64)
     private String id;
+
+    @Column(name = "ticket_id", nullable = false, length = 64)
     private String ticketId;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Status status;
 
     public enum Status {

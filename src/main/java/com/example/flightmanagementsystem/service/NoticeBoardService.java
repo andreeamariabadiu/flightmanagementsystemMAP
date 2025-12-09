@@ -2,27 +2,41 @@ package com.example.flightmanagementsystem.service;
 
 import com.example.flightmanagementsystem.model.NoticeBoard;
 import com.example.flightmanagementsystem.repository.NoticeBoardRepository;
+import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
+@Service
 public class NoticeBoardService {
-    private final NoticeBoardRepository repo;
+    private final NoticeBoardRepository noticeBoardRepository;
 
-    public NoticeBoardService(NoticeBoardRepository repo) { this.repo = repo; }
-
-    public NoticeBoard create(LocalDate date) {
-        NoticeBoard n = new NoticeBoard();
-        n.setId(UUID.randomUUID().toString());
-        n.setDate(date);
-        return repo.save(n);
+    public NoticeBoardService(NoticeBoardRepository noticeBoardRepository) {
+        this.noticeBoardRepository = noticeBoardRepository;
     }
 
-    public List<NoticeBoard> findAll() { return repo.findAll(); }
-    public Optional<NoticeBoard> findById(String id) { return repo.findById(id); }
-    public boolean delete(String id) { return repo.deleteById(id); }
-    public NoticeBoard save(NoticeBoard n) { return repo.save(n); }
-}
+    public NoticeBoard save(NoticeBoard nb) {
+        return noticeBoardRepository.save(nb);
+    }
 
+    public boolean delete(String id) {
+        if (noticeBoardRepository.existsById(id)) {
+            noticeBoardRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public List<NoticeBoard> findAll() {
+        return noticeBoardRepository.findAll();
+    }
+
+    public Optional<NoticeBoard> findById(String id) {
+        return noticeBoardRepository.findById(id);
+    }
+
+    public void update(String id, NoticeBoard updated) {
+        updated.setId(id);
+        noticeBoardRepository.save(updated);
+    }
+}

@@ -1,5 +1,9 @@
 package com.example.flightmanagementsystem.repository;
 
 import com.example.flightmanagementsystem.model.Passenger;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-public class PassengerRepository extends InMemoryRepository<Passenger> {}
+@Repository
+public interface PassengerRepository extends JpaRepository<Passenger, String> {
+}

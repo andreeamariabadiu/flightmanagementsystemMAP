@@ -2,26 +2,41 @@ package com.example.flightmanagementsystem.service;
 
 import com.example.flightmanagementsystem.model.Passenger;
 import com.example.flightmanagementsystem.repository.PassengerRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
+@Service
 public class PassengerService {
-    private final PassengerRepository repo;
+    private final PassengerRepository passengerRepository;
 
-    public PassengerService(PassengerRepository repo) { this.repo = repo; }
-
-    public Passenger create(String name, String currency) {
-        Passenger p = new Passenger();
-        p.setId(UUID.randomUUID().toString());
-        p.setName(name);
-        p.setCurrency(currency);
-        return repo.save(p);
+    public PassengerService(PassengerRepository passengerRepository) {
+        this.passengerRepository = passengerRepository;
     }
 
-    public List<Passenger> findAll() { return repo.findAll(); }
-    public Optional<Passenger> findById(String id) { return repo.findById(id); }
-    public boolean delete(String id) { return repo.deleteById(id); }
-    public Passenger save(Passenger p) { return repo.save(p); }
+    public Passenger save(Passenger p) {
+        return passengerRepository.save(p);
+    }
+
+    public boolean delete(String id) {
+        if (passengerRepository.existsById(id)) {
+            passengerRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public List<Passenger> findAll() {
+        return passengerRepository.findAll();
+    }
+
+    public Optional<Passenger> findById(String id) {
+        return passengerRepository.findById(id);
+    }
+
+    public void update(String id, Passenger updated) {
+        updated.setId(id);
+        passengerRepository.save(updated);
+    }
 }

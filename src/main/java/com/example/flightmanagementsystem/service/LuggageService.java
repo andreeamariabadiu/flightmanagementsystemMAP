@@ -2,26 +2,41 @@ package com.example.flightmanagementsystem.service;
 
 import com.example.flightmanagementsystem.model.Luggage;
 import com.example.flightmanagementsystem.repository.LuggageRepository;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 
+@Service
 public class LuggageService {
-    private final LuggageRepository repo;
+    private final LuggageRepository luggageRepository;
 
-    public LuggageService(LuggageRepository repo) { this.repo = repo; }
-
-    public Luggage create(String ticketId, Luggage.Status status) {
-        Luggage l = new Luggage();
-        l.setId(UUID.randomUUID().toString());
-        l.setTicketId(ticketId);
-        l.setStatus(status);
-        return repo.save(l);
+    public LuggageService(LuggageRepository luggageRepository) {
+        this.luggageRepository = luggageRepository;
     }
 
-    public List<Luggage> findAll() { return repo.findAll(); }
-    public Optional<Luggage> findById(String id) { return repo.findById(id); }
-    public boolean delete(String id) { return repo.deleteById(id); }
-    public Luggage save(Luggage l) { return repo.save(l); }
+    public Luggage save(Luggage l) {
+        return luggageRepository.save(l);
+    }
+
+    public boolean delete(String id) {
+        if (luggageRepository.existsById(id)) {
+            luggageRepository.deleteById(id);
+            return true;
+        }
+        return false;
+    }
+
+    public List<Luggage> findAll() {
+        return luggageRepository.findAll();
+    }
+
+    public Optional<Luggage> findById(String id) {
+        return luggageRepository.findById(id);
+    }
+
+    public void update(String id, Luggage updated) {
+        updated.setId(id);
+        luggageRepository.save(updated);
+    }
 }
