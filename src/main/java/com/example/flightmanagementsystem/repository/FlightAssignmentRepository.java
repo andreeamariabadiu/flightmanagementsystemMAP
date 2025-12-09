@@ -7,7 +7,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface FlightAssignmentRepository extends JpaRepository<FlightAssignment, String> {
 
-    boolean existsByFlightIdAndStaffId(String flightId, String staffId);
+    boolean existsByFlight_IdAndEmployee_Id(String flightId, String employeeId);
 
-    boolean existsByFlightIdAndStaffIdAndIdNot(String flightId, String staffId, String id);
+    boolean existsByFlight_IdAndEmployee_IdAndIdNot(String flightId, String employeeId, String id);
 }

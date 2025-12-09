@@ -1,9 +1,12 @@
 package com.example.flightmanagementsystem.service;
 
+import com.example.flightmanagementsystem.model.Flight;
+import com.example.flightmanagementsystem.model.Passenger;
 import com.example.flightmanagementsystem.model.Ticket;
+import com.example.flightmanagementsystem.repository.FlightRepository;
+import com.example.flightmanagementsystem.repository.PassengerRepository;
 import com.example.flightmanagementsystem.repository.TicketRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
@@ -11,46 +14,59 @@ import java.util.Optional;
 public class TicketService {
 
     private final TicketRepository ticketRepository;
+    private final FlightRepository flightRepository;
+    private final PassengerRepository passengerRepository;
 
-    public TicketService(TicketRepository ticketRepository) {
+    public TicketService(TicketRepository ticketRepository, FlightRepository flightRepository, PassengerRepository passengerRepository) {
         this.ticketRepository = ticketRepository;
+        this.flightRepository = flightRepository;
+        this.passengerRepository = passengerRepository;
     }
 
-    // --- BUSINESS VALIDATION ---
     private void validateBusinessRules(Ticket ticket, String currentId) {
-
-        // Regula 1: Verificare ID Unic (doar la creare)
         if (currentId == null && ticketRepository.existsById(ticket.getId())) {
-            throw new IllegalArgumentException("Ticket ID " + ticket.getId() + " already exists.");
+            throw new IllegalArgumentException("Ticket ID already exists.");
         }
-
-        // Regula 2: Verificare Loc Unic pe Zbor (Double Booking)
-        boolean seatOccupied;
+        // Verificare loc ocupat
+        // Notă: Aici folosim getFlight().getId() pentru că avem obiectul
+        boolean seatTaken;
         if (currentId == null) {
-            // Caz Creare: Caută orice bilet cu acest zbor și loc
-            seatOccupied = ticketRepository.existsByFlightIdAndSeatNumber(
-                    ticket.getFlightId(), ticket.getSeatNumber());
+            seatTaken = ticketRepository.existsByFlightIdAndSeatNumber(ticket.getFlight().getId(), ticket.getSeatNumber());
         } else {
-            // Caz Update: Caută orice ALT bilet (exclude biletul curent) cu acest zbor și loc
-            seatOccupied = ticketRepository.existsByFlightIdAndSeatNumberAndIdNot(
-                    ticket.getFlightId(), ticket.getSeatNumber(), currentId);
+            seatTaken = ticketRepository.existsByFlightIdAndSeatNumberAndIdNot(ticket.getFlight().getId(), ticket.getSeatNumber(), currentId);
         }
-
-        if (seatOccupied) {
-            throw new IllegalArgumentException("Seat " + ticket.getSeatNumber() +
-                    " is already booked for Flight " + ticket.getFlightId());
+        if (seatTaken) {
+            throw new IllegalArgumentException("Seat " + ticket.getSeatNumber() + " is already booked.");
         }
     }
 
-    public Ticket save(Ticket t) {
-        validateBusinessRules(t, null); // null indică creare nouă
-        return ticketRepository.save(t);
+    // CREATE
+    public Ticket createTicket(Ticket ticket, String flightId, String passengerId) {
+        Flight flight = flightRepository.findById(flightId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Flight ID"));
+        Passenger passenger = passengerRepository.findById(passengerId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Passenger ID"));
+
+        ticket.setFlight(flight);
+        ticket.setPassenger(passenger);
+
+        validateBusinessRules(ticket, null);
+        return ticketRepository.save(ticket);
     }
 
-    public void updateTicket(String id, Ticket updated) {
-        validateBusinessRules(updated, id); // id indică editare
-        updated.setId(id);
-        ticketRepository.save(updated);
+    // UPDATE
+    public void updateTicket(String id, Ticket ticket, String flightId, String passengerId) {
+        Flight flight = flightRepository.findById(flightId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Flight ID"));
+        Passenger passenger = passengerRepository.findById(passengerId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Passenger ID"));
+
+        ticket.setFlight(flight);
+        ticket.setPassenger(passenger);
+        ticket.setId(id);
+
+        validateBusinessRules(ticket, id);
+        ticketRepository.save(ticket);
     }
 
     public boolean delete(String id) {
@@ -60,8 +76,6 @@ public class TicketService {
         }
         return false;
     }
-
     public List<Ticket> findAll() { return ticketRepository.findAll(); }
-
     public Optional<Ticket> findById(String id) { return ticketRepository.findById(id); }
 }

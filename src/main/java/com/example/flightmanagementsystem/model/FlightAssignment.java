@@ -5,53 +5,32 @@ import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "flight_assignments")
-public class FlightAssignment implements Identifiable{
+public class FlightAssignment implements Identifiable {
 
-    @NotBlank(message = "ID can't be blank")
     @Id
     @Column(length = 64)
-    public String id;
+    @NotBlank(message = "ID can't be blank")
+    private String id;
 
-    @NotBlank(message = "Flight ID can't be blank")
-    @Column(nullable = false)
-    public String flightId;
+    // --- RELAȚIE: ManyToOne cu Flight ---
+    @ManyToOne
+    @JoinColumn(name = "flight_id", nullable = false)
+    private Flight flight;
 
-    @NotBlank(message = "Staff ID can't be blank")
-    @Column(nullable = false)
-    public String staffId;
-
-    public FlightAssignment(String id, String flightId, String staffId) {
-        this.id = id;
-        this.flightId = flightId;
-        this.staffId = staffId;
-    }
+    // --- RELAȚIE: ManyToOne cu AirlineEmployee ---
+    @ManyToOne
+    @JoinColumn(name = "employee_id", nullable = false)
+    private AirlineEmployee employee;
 
     public FlightAssignment() {}
 
-    //getters and setters
+    // Getters and Setters
+    @Override public String getId() { return id; }
+    @Override public void setId(String id) { this.id = id; }
 
-    @Override
-    public String getId() {
-        return id;
-    }
+    public Flight getFlight() { return flight; }
+    public void setFlight(Flight flight) { this.flight = flight; }
 
-    @Override
-    public void setId(String id) {
-        this.id = id;
-    }
-
-    public String getFlightId() {
-        return flightId;
-    }
-    public void setFlightId(String flightId) {
-        this.flightId = flightId;
-    }
-
-    public String getStaffId() {
-        return staffId;
-    }
-    public void setStaffId(String staffId) {
-        this.staffId = staffId;
-    }
-
+    public AirlineEmployee getEmployee() { return employee; }
+    public void setEmployee(AirlineEmployee employee) { this.employee = employee; }
 }

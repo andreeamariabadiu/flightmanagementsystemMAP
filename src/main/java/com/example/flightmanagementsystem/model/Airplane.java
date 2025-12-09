@@ -22,14 +22,8 @@ public class Airplane implements Identifiable{
     @Positive(message = "Airplane number must be > 0")
     private int airplaneNumber;
 
-    @NotEmpty(message = "Airplane must have at least one flight assigned")
-    @ElementCollection
-    @CollectionTable(
-            name = "airplane_flights",
-            joinColumns = @JoinColumn(name = "airplane_id")
-    )
-    @Column(name = "flight_id")
-    private List<String> flights = new ArrayList<>();// Flight IDs
+    @OneToMany(mappedBy = "airplane", cascade = CascadeType.ALL)
+    private List<Flight> flights = new ArrayList<>();// Flight IDs
 
     public Airplane(String id, int airplaneNumber, List flights) {
         this.id = id;
@@ -59,11 +53,7 @@ public class Airplane implements Identifiable{
         this.airplaneNumber = airplaneNumber;
     }
 
-    public List<String> getFlights() {
-        return flights;
-    }
+    public List<Flight> getFlights() { return flights; }
 
-    public void setFlights(List<String> flights) {
-        this.flights = flights;
-    }
+    public void setFlights(List<Flight> flights) { this.flights = flights; }
 }

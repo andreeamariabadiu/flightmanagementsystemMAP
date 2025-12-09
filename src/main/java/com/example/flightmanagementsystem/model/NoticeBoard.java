@@ -23,13 +23,9 @@ public class NoticeBoard implements Identifiable {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "noticeboard_flights",
-            joinColumns = @JoinColumn(name = "noticeboard_id")
-    )
-    @Column(name = "flight_id")
-    private List<String> flightsOfTheDay = new ArrayList<>(); // Flight IDs
+    // --- RELAȚIE OneToMany: Un panou are mai multe zboruri ---
+    @OneToMany(mappedBy = "noticeBoard", cascade = CascadeType.ALL)
+    private List<Flight> flightsOfTheDay = new ArrayList<>();
 
     public NoticeBoard() {}
 
@@ -39,18 +35,14 @@ public class NoticeBoard implements Identifiable {
     }
 
     // Getters and Setters
-
     @Override
     public String getId() { return id; }
-
     @Override
     public void setId(String id) { this.id = id; }
 
     public LocalDate getDate() { return date; }
-
     public void setDate(LocalDate date) { this.date = date; }
 
-    public List<String> getFlightsOfTheDay() { return flightsOfTheDay; }
-
-    public void setFlightsOfTheDay(List<String> flightsOfTheDay) { this.flightsOfTheDay = flightsOfTheDay; }
+    public List<Flight> getFlightsOfTheDay() { return flightsOfTheDay; }
+    public void setFlightsOfTheDay(List<Flight> flightsOfTheDay) { this.flightsOfTheDay = flightsOfTheDay; }
 }
