@@ -2,13 +2,11 @@ package com.example.flightmanagementsystem.controller;
 
 import com.example.flightmanagementsystem.model.Passenger;
 import com.example.flightmanagementsystem.service.PassengerService;
+import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @Controller
 @RequestMapping("/passengers")
@@ -20,65 +18,85 @@ public class PassengerController {
         this.passengerService = passengerService;
     }
 
-    // List all passengers
+    // 1. Listare
     @GetMapping
     public String listPassengers(Model model) {
         model.addAttribute("passengers", passengerService.findAll());
         return "passenger/index";
     }
 
-    // Form to create new passenger
+    // 2. Formular Creare
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("passenger", new Passenger());
         return "passenger/form";
     }
 
-    // Handle create (POST). tickets param is comma-separated IDs (optional)
+    // 3. Procesare Creare (POST)
     @PostMapping
     public String createPassenger(
-            @RequestParam String id,
-            @RequestParam String name,
-            @RequestParam String currency,
-            @RequestParam(required = false) String tickets
+            @Valid @ModelAttribute("passenger") Passenger passenger,
+            BindingResult bindingResult
     ) {
-        Passenger p = new Passenger(id, name, currency);
-
-        if (tickets != null && !tickets.isBlank()) {
-            List<String> list = Arrays.stream(tickets.split(","))
-                    .map(String::trim)
-                    .filter(s -> !s.isEmpty())
-                    .collect(Collectors.toList());
-            p.setTickets(list);
+        // Validări standard (@NotBlank, @Pattern)
+        if (bindingResult.hasErrors()) {
+            return "passenger/form";
         }
 
-        passengerService.save(p);
+        // Validare Business (ID unic)
+        try {
+            passengerService.save(passenger);
+        } catch (IllegalArgumentException e) {
+            bindingResult.reject("global.error", e.getMessage());
+            return "passenger/form";
+        }
+
         return "redirect:/passengers";
     }
 
-    // Delete
+    // 4. Formular Editare
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable String id, Model model) {
+        Passenger p = passengerService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid passenger id: " + id));
+
+        model.addAttribute("passenger", p);
+        return "passenger/form";
+    }
+
+    // 5. Procesare Editare (POST)
+    @PostMapping("/{id}")
+    public String updatePassenger(
+            @PathVariable String id,
+            @Valid @ModelAttribute("passenger") Passenger passenger,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            return "passenger/form";
+        }
+
+        try {
+            passengerService.updatePassenger(id, passenger);
+        } catch (IllegalArgumentException e) {
+            bindingResult.reject("global.error", e.getMessage());
+            return "passenger/form";
+        }
+
+        return "redirect:/passengers";
+    }
+
+    // 6. Ștergere
     @PostMapping("/{id}/delete")
     public String deletePassenger(@PathVariable String id) {
         passengerService.delete(id);
         return "redirect:/passengers";
     }
 
-    // Edit form
-    @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable String id, Model model) {
-        Passenger p = passengerService.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
-        model.addAttribute("passenger", p);
-        String ticketsCsv = String.join(", ", p.getTickets());
-        model.addAttribute("ticketsCsv", ticketsCsv);
-        return "passenger/form";
-    }
-
-    // Details
+    // 7. Detalii
     @GetMapping("/{id}/details")
     public String showDetails(@PathVariable String id, Model model) {
         Passenger p = passengerService.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid passenger id: " + id));
         model.addAttribute("passenger", p);
         return "passenger/details";
     }

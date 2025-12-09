@@ -15,8 +15,23 @@ public class LuggageService {
         this.luggageRepository = luggageRepository;
     }
 
+    // --- BUSINESS VALIDATION ---
+    private void validateBusinessRules(Luggage luggage, String currentId) {
+        // Regula 1: ID Unic (doar la creare)
+        if (currentId == null && luggageRepository.existsById(luggage.getId())) {
+            throw new IllegalArgumentException("Luggage ID " + luggage.getId() + " already exists.");
+        }
+    }
+
     public Luggage save(Luggage l) {
+        validateBusinessRules(l, null);
         return luggageRepository.save(l);
+    }
+
+    public void updateLuggage(String id, Luggage updated) {
+        validateBusinessRules(updated, id);
+        updated.setId(id);
+        luggageRepository.save(updated);
     }
 
     public boolean delete(String id) {
@@ -33,10 +48,5 @@ public class LuggageService {
 
     public Optional<Luggage> findById(String id) {
         return luggageRepository.findById(id);
-    }
-
-    public void update(String id, Luggage updated) {
-        updated.setId(id);
-        luggageRepository.save(updated);
     }
 }

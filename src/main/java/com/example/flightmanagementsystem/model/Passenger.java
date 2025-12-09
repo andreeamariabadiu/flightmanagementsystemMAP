@@ -1,6 +1,9 @@
 package com.example.flightmanagementsystem.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Pattern;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -10,12 +13,15 @@ public class Passenger implements Identifiable {
 
     @Id
     @Column(length = 64)
+    @NotBlank(message = "ID can't be blank")
     private String id;
 
     @Column(nullable = false)
+    @NotBlank(message = "Name can't be blank")
     private String name;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 3)
+    @NotBlank(message = "Currency is required")
     private String currency;
 
     @ElementCollection
@@ -33,6 +39,8 @@ public class Passenger implements Identifiable {
         this.name = name;
         this.currency = currency;
     }
+
+    // Getters and Setters
 
     @Override
     public String getId() { return id; }

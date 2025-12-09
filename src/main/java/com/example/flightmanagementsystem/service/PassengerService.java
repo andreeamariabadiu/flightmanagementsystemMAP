@@ -15,8 +15,23 @@ public class PassengerService {
         this.passengerRepository = passengerRepository;
     }
 
+    // --- BUSINESS VALIDATION ---
+    private void validateBusinessRules(Passenger passenger, String currentId) {
+        // Regula 1: ID Unic (doar la creare)
+        if (currentId == null && passengerRepository.existsById(passenger.getId())) {
+            throw new IllegalArgumentException("Passenger ID " + passenger.getId() + " is already in use.");
+        }
+    }
+
     public Passenger save(Passenger p) {
+        validateBusinessRules(p, null);
         return passengerRepository.save(p);
+    }
+
+    public void updatePassenger(String id, Passenger updated) {
+        validateBusinessRules(updated, id);
+        updated.setId(id);
+        passengerRepository.save(updated);
     }
 
     public boolean delete(String id) {
@@ -33,10 +48,5 @@ public class PassengerService {
 
     public Optional<Passenger> findById(String id) {
         return passengerRepository.findById(id);
-    }
-
-    public void update(String id, Passenger updated) {
-        updated.setId(id);
-        passengerRepository.save(updated);
     }
 }

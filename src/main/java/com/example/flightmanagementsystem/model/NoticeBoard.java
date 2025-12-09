@@ -1,6 +1,10 @@
 package com.example.flightmanagementsystem.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+import org.springframework.format.annotation.DateTimeFormat;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -11,9 +15,12 @@ public class NoticeBoard implements Identifiable {
 
     @Id
     @Column(length = 64)
+    @NotBlank(message = "ID can't be blank")
     private String id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
+    @NotNull(message = "Date is required")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
     @ElementCollection
@@ -30,6 +37,8 @@ public class NoticeBoard implements Identifiable {
         this.id = id;
         this.date = date;
     }
+
+    // Getters and Setters
 
     @Override
     public String getId() { return id; }

@@ -16,7 +16,42 @@ public class TicketService {
         this.ticketRepository = ticketRepository;
     }
 
-    public Ticket save(Ticket t) { return ticketRepository.save(t); }
+    // --- BUSINESS VALIDATION ---
+    private void validateBusinessRules(Ticket ticket, String currentId) {
+
+        // Regula 1: Verificare ID Unic (doar la creare)
+        if (currentId == null && ticketRepository.existsById(ticket.getId())) {
+            throw new IllegalArgumentException("Ticket ID " + ticket.getId() + " already exists.");
+        }
+
+        // Regula 2: Verificare Loc Unic pe Zbor (Double Booking)
+        boolean seatOccupied;
+        if (currentId == null) {
+            // Caz Creare: Caută orice bilet cu acest zbor și loc
+            seatOccupied = ticketRepository.existsByFlightIdAndSeatNumber(
+                    ticket.getFlightId(), ticket.getSeatNumber());
+        } else {
+            // Caz Update: Caută orice ALT bilet (exclude biletul curent) cu acest zbor și loc
+            seatOccupied = ticketRepository.existsByFlightIdAndSeatNumberAndIdNot(
+                    ticket.getFlightId(), ticket.getSeatNumber(), currentId);
+        }
+
+        if (seatOccupied) {
+            throw new IllegalArgumentException("Seat " + ticket.getSeatNumber() +
+                    " is already booked for Flight " + ticket.getFlightId());
+        }
+    }
+
+    public Ticket save(Ticket t) {
+        validateBusinessRules(t, null); // null indică creare nouă
+        return ticketRepository.save(t);
+    }
+
+    public void updateTicket(String id, Ticket updated) {
+        validateBusinessRules(updated, id); // id indică editare
+        updated.setId(id);
+        ticketRepository.save(updated);
+    }
 
     public boolean delete(String id) {
         if (ticketRepository.existsById(id)) {
@@ -29,9 +64,4 @@ public class TicketService {
     public List<Ticket> findAll() { return ticketRepository.findAll(); }
 
     public Optional<Ticket> findById(String id) { return ticketRepository.findById(id); }
-
-    public void update(String id, Ticket updated) {
-        updated.setId(id);
-        ticketRepository.save(updated);
-    }
 }

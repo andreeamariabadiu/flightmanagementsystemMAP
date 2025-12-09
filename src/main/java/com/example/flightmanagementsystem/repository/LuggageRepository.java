@@ -6,4 +6,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface LuggageRepository extends JpaRepository<Luggage, String> {
+    // JpaRepository oferă deja existsById, save, findAll etc.
 }
