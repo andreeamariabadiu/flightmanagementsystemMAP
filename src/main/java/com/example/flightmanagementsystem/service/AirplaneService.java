@@ -2,12 +2,9 @@ package com.example.flightmanagementsystem.service;
 
 import com.example.flightmanagementsystem.model.Airplane;
 import com.example.flightmanagementsystem.repository.AirplaneRepository;
-
-import java.util.List;
-import java.util.ArrayList;
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AirplaneService {
@@ -17,33 +14,33 @@ public class AirplaneService {
         this.airplaneRepository = airplaneRepository;
     }
 
-    // --- BUSINESS LOGIC ---
-    private void validateBusinessRules(Airplane airplane, String currentId) {
-
-        // Rule 1: Unique ID (Only check on Create)
-        if (currentId == null && airplaneRepository.existsById(airplane.getId())) {
-            throw new IllegalArgumentException("Airplane ID " + airplane.getId() + " is already taken.");
+    private void validateRules(Airplane a, String currentId) {
+        // 1. ID Unic
+        if (currentId == null && airplaneRepository.existsById(a.getId())) {
+            throw new IllegalArgumentException("Airplane ID " + a.getId() + " is already in use.");
         }
-
-        // Rule 2: Unique Airplane Number
+        // 2. Număr Unic
         boolean numberTaken;
         if (currentId == null) {
-            // New airplane
-            numberTaken = airplaneRepository.existsByAirplaneNumber(airplane.getAirplaneNumber());
+            numberTaken = airplaneRepository.existsByAirplaneNumber(a.getAirplaneNumber());
         } else {
-            // Editing existing airplane (ignore self)
-            numberTaken = airplaneRepository.existsByAirplaneNumberAndIdNot(airplane.getAirplaneNumber(), currentId);
+            numberTaken = airplaneRepository.existsByAirplaneNumberAndIdNot(a.getAirplaneNumber(), currentId);
         }
-
         if (numberTaken) {
-            throw new IllegalArgumentException("Airplane Number " + airplane.getAirplaneNumber() + " is already in use.");
+            throw new IllegalArgumentException("Airplane Number " + a.getAirplaneNumber() + " is already assigned.");
         }
     }
 
-
     public Airplane save(Airplane a) {
-        validateBusinessRules(a, null);
+        validateRules(a, null);
         return airplaneRepository.save(a);
+    }
+
+    public void updateAirplane(String id, Airplane update) {
+        validateRules(update, id);
+        update.setId(id);
+        // Lista de zboruri (flights) este gestionată de JPA, nu o suprascriem aici manual
+        airplaneRepository.save(update);
     }
 
     public boolean delete(String id) {
@@ -54,17 +51,6 @@ public class AirplaneService {
         return false;
     }
 
-    public List<Airplane> findAll() {
-        return airplaneRepository.findAll();
-    }
-
-    public Optional<Airplane> findById(String id) {
-        return airplaneRepository.findById(id);
-    }
-
-    public void updateAirplane(String id, Airplane update) {
-        validateBusinessRules(update, id);
-        update.setId(id);
-        airplaneRepository.save(update);
-    }
+    public List<Airplane> findAll() { return airplaneRepository.findAll(); }
+    public Optional<Airplane> findById(String id) { return airplaneRepository.findById(id); }
 }

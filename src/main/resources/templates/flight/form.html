@@ -46,19 +46,14 @@
 
                         <div class="mb-3">
                             <label class="form-label">Flight ID</label>
-                            <input type="text" class="form-control" th:field="*{id}"
-                                   th:readonly="${flight.id != null && flight.id != ''}"
-                                   th:classappend="${#fields.hasErrors('id')} ? 'is-invalid' : ''"
-                                   placeholder="e.g. F-2024-NY"/>
+                            <input type="text" class="form-control" th:field="*{id}" th:readonly="${flight.id != null && flight.id != ''}" th:classappend="${#fields.hasErrors('id')} ? 'is-invalid' : ''" placeholder="e.g. F-2024-NY"/>
                             <div class="invalid-feedback" th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Flight Name</label>
-                                <input type="text" class="form-control" th:field="*{flightName}"
-                                       th:classappend="${#fields.hasErrors('flightName')} ? 'is-invalid' : ''"
-                                       placeholder="e.g. New York to London"/>
+                                <input type="text" class="form-control" th:field="*{flightName}" th:classappend="${#fields.hasErrors('flightName')} ? 'is-invalid' : ''" placeholder="e.g. New York to London"/>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('flightName')}" th:errors="*{flightName}"></div>
                             </div>
                             <div class="col-md-6">
@@ -74,14 +69,12 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Departure Time</label>
-                                <input type="datetime-local" class="form-control" th:field="*{departureTime}"
-                                       th:classappend="${#fields.hasErrors('departureTime')} ? 'is-invalid' : ''"/>
+                                <input type="datetime-local" class="form-control" th:field="*{departureTime}" th:classappend="${#fields.hasErrors('departureTime')} ? 'is-invalid' : ''"/>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('departureTime')}" th:errors="*{departureTime}"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Arrival Time</label>
-                                <input type="datetime-local" class="form-control" th:field="*{arrivalTime}"
-                                       th:classappend="${#fields.hasErrors('arrivalTime')} ? 'is-invalid' : ''"/>
+                                <input type="datetime-local" class="form-control" th:field="*{arrivalTime}" th:classappend="${#fields.hasErrors('arrivalTime')} ? 'is-invalid' : ''"/>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('arrivalTime')}" th:errors="*{arrivalTime}"></div>
                             </div>
                         </div>
@@ -91,6 +84,7 @@
                                 <label class="form-label">Airplane</label>
                                 <select class="form-select" name="airplaneId" required>
                                     <option value="" disabled th:selected="${flight.airplane == null}">-- Select Airplane --</option>
+
                                     <option th:each="plane : ${airplanes}"
                                             th:value="${plane.id}"
                                             th:text="'Tail: ' + ${plane.id} + ' (No. ' + ${plane.airplaneNumber} + ')'"
@@ -104,6 +98,7 @@
                                 <label class="form-label">Daily Schedule (Notice Board)</label>
                                 <select class="form-select" name="noticeBoardId" required>
                                     <option value="" disabled th:selected="${flight.noticeBoard == null}">-- Select Date --</option>
+
                                     <option th:each="nb : ${noticeBoards}"
                                             th:value="${nb.id}"
                                             th:text="${nb.date} + ' (ID: ' + ${nb.id} + ')'"

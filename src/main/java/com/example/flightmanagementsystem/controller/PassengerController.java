@@ -32,18 +32,16 @@ public class PassengerController {
         return "passenger/form";
     }
 
-    // 3. Procesare Creare (POST)
+    // 3. Procesare Creare
     @PostMapping
     public String createPassenger(
             @Valid @ModelAttribute("passenger") Passenger passenger,
             BindingResult bindingResult
     ) {
-        // Validări standard (@NotBlank, @Pattern)
         if (bindingResult.hasErrors()) {
             return "passenger/form";
         }
 
-        // Validare Business (ID unic)
         try {
             passengerService.save(passenger);
         } catch (IllegalArgumentException e) {
@@ -59,12 +57,11 @@ public class PassengerController {
     public String showEditForm(@PathVariable String id, Model model) {
         Passenger p = passengerService.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid passenger id: " + id));
-
         model.addAttribute("passenger", p);
         return "passenger/form";
     }
 
-    // 5. Procesare Editare (POST)
+    // 5. Procesare Editare
     @PostMapping("/{id}")
     public String updatePassenger(
             @PathVariable String id,

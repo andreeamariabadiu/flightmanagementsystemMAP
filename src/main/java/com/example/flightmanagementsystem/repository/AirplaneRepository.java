@@ -8,6 +8,5 @@ import org.springframework.stereotype.Repository;
 public interface AirplaneRepository extends JpaRepository<Airplane, String> {
 
     boolean existsByAirplaneNumber(Integer airplaneNumber);
-
     boolean existsByAirplaneNumberAndIdNot(Integer airplaneNumber, String id);
 }

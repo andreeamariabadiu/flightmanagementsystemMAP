@@ -14,12 +14,12 @@ public class Ticket implements Identifiable {
     @NotBlank(message = "Id can't be blank")
     private String id;
 
-    // --- RELAȚIE: ManyToOne cu Passenger ---
+    // RELAȚIE: ManyToOne cu Passenger
     @ManyToOne
     @JoinColumn(name = "passenger_id", nullable = false)
     private Passenger passenger;
 
-    // --- RELAȚIE: ManyToOne cu Flight ---
+    // RELAȚIE: ManyToOne cu Flight
     @ManyToOne
     @JoinColumn(name = "flight_id", nullable = false)
     private Flight flight;
@@ -33,14 +33,12 @@ public class Ticket implements Identifiable {
     @NotBlank(message = "Seat number can't be blank")
     private String seatNumber;
 
-    @ElementCollection
-    @CollectionTable(name = "ticket_luggages", joinColumns = @JoinColumn(name = "ticket_id"))
-    @Column(name = "luggage_id")
-    private List<String> luggages = new ArrayList<>();
+    // RELAȚIE: Un bilet are mai multe bagaje
+    @OneToMany(mappedBy = "ticket", cascade = CascadeType.ALL)
+    private List<Luggage> luggages = new ArrayList<>();
 
     public Ticket() {}
 
-    // Getters and Setters
     @Override public String getId() { return id; }
     @Override public void setId(String id) { this.id = id; }
 
@@ -56,6 +54,6 @@ public class Ticket implements Identifiable {
     public String getSeatNumber() { return seatNumber; }
     public void setSeatNumber(String seatNumber) { this.seatNumber = seatNumber; }
 
-    public List<String> getLuggages() { return luggages; }
-    public void setLuggages(List<String> luggages) { this.luggages = luggages; }
+    public List<Luggage> getLuggages() { return luggages; }
+    public void setLuggages(List<Luggage> luggages) { this.luggages = luggages; }
 }

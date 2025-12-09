@@ -53,7 +53,7 @@
                             <tr>
                                 <th scope="col" class="ps-3">Flight</th>
                                 <th scope="col">Route / Time</th>
-                                <th scope="col">Details</th>
+                                <th scope="col">Resources</th>
                                 <th scope="col">Status</th>
                                 <th scope="col" class="text-end pe-3">Actions</th>
                             </tr>
@@ -75,7 +75,7 @@
                                 <td>
                                     <div class="small text-muted">
                                         <div>✈ Plane: <span class="text-light" th:text="${f.airplane != null ? f.airplane.id : 'N/A'}"></span></div>
-                                        <div>🗓 Board: <span class="text-light" th:text="${f.noticeBoard != null ? #temporals.format(f.noticeBoard.date, 'dd-MM') : 'N/A'}"></span></div>
+                                        <div>🗓 Board: <span class="text-light" th:text="${f.noticeBoard != null ? #temporals.format(f.noticeBoard.date, 'yyyy-MM-dd') : 'N/A'}"></span></div>
                                     </div>
                                 </td>
                                 <td>

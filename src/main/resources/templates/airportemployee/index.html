@@ -2,14 +2,17 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Flight Assignments | FMS</title>
+    <title>Airport Staff | FMS</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
         body { background: linear-gradient(135deg, #020617, #0f172a); min-height: 100vh; color: #e5e7eb; }
         .page-wrapper { padding-top: 4rem; padding-bottom: 4rem; }
-        .card-main { background-color: #020617; border-radius: 18px; border: 1px solid rgba(148, 163, 184, 0.35); }
+        .card-main { background-color: #020617; border-radius: 18px; border: 1px solid rgba(148, 163, 184, 0.35); box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8); }
+        .navbar-brand { font-weight: 600; letter-spacing: .06em; color: #cbd5f5 !important; }
+        .btn-primary { border-radius: 999px; }
+        .table thead { background: rgba(15, 23, 42, 0.9); }
         .badge-id { background: rgba(148, 163, 184, 0.15); border: 1px solid rgba(148, 163, 184, 0.3); color: #cbd5e1; font-size: 0.75rem; padding: 0.2em 0.5em; border-radius: 4px; }
-        .role-badge { font-size: 0.75rem; text-transform: uppercase; font-weight: bold; color: #93c5fd; }
+        .dept-pill { background: rgba(168, 85, 247, .15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, .3); padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; }
     </style>
 </head>
 <body>
@@ -23,42 +26,37 @@
             <div class="card card-main">
                 <div class="card-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="mb-1 text-light">Crew Assignments</h3>
-                        <p class="text-muted mb-0" style="font-size: 0.9rem;">Manage pilot and crew schedules.</p>
+                        <h3 class="mb-1 text-light">Airport Staff</h3>
+                        <p class="text-muted mb-0" style="font-size: 0.9rem;">Manage ground staff and operations.</p>
                     </div>
-                    <a href="/flight-assignments/new" class="btn btn-primary btn-sm">+ Assign Crew</a>
+                    <a href="/airport-employees/new" class="btn btn-primary btn-sm">+ New Employee</a>
                 </div>
                 <div class="card-body px-4 pb-4 pt-3">
-                    <div th:if="${!#lists.isEmpty(flightAssignments)}" class="table-responsive">
+                    <div th:if="${!#lists.isEmpty(employees)}" class="table-responsive">
                         <table class="table table-dark table-borderless align-middle mb-0">
                             <thead>
                             <tr>
-                                <th scope="col" class="ps-3">Assignment ID</th>
-                                <th scope="col">Flight</th>
-                                <th scope="col">Employee</th>
+                                <th scope="col" class="ps-3">Name</th>
+                                <th scope="col">Department</th>
+                                <th scope="col">Designation</th>
                                 <th scope="col" class="text-end pe-3">Actions</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr th:each="fa : ${flightAssignments}">
+                            <tr th:each="e : ${employees}">
                                 <td class="ps-3">
-                                    <span class="badge-id" th:text="${fa.id}"></span>
-                                </td>
-                                <td>
-                                    <span class="fw-bold text-info me-2">✈ <span th:text="${fa.flight.flightName}"></span></span>
-                                    <span class="small text-muted" th:text="${#temporals.format(fa.flight.departureTime, 'MMM dd')}"></span>
-                                </td>
-                                <td>
-                                    <div class="d-flex align-items-center">
-                                        <span class="me-2">👤 <span th:text="${fa.employee.name}"></span></span>
-                                        <span class="role-badge" th:text="${fa.employee.role}"></span>
+                                    <div class="d-flex flex-column">
+                                        <span class="fw-bold text-white" th:text="${e.name}"></span>
+                                        <span class="badge-id w-auto" style="width: fit-content;" th:text="'ID: ' + ${e.id}"></span>
                                     </div>
                                 </td>
+                                <td><span class="dept-pill" th:text="${e.department}"></span></td>
+                                <td class="text-light" th:text="${e.designation}"></td>
                                 <td class="text-end pe-3">
                                     <div class="btn-group btn-group-sm">
-                                        <a th:href="@{'/flight-assignments/' + ${fa.id} + '/details'}" class="btn btn-outline-light">Details</a>
-                                        <a th:href="@{'/flight-assignments/' + ${fa.id} + '/edit'}" class="btn btn-outline-primary">Edit</a>
-                                        <form th:action="@{'/flight-assignments/' + ${fa.id} + '/delete'}" method="post" style="display:contents;">
+                                        <a th:href="@{'/airport-employees/' + ${e.id} + '/details'}" class="btn btn-outline-light">Details</a>
+                                        <a th:href="@{'/airport-employees/' + ${e.id} + '/edit'}" class="btn btn-outline-primary">Edit</a>
+                                        <form th:action="@{'/airport-employees/' + ${e.id} + '/delete'}" method="post" style="display:contents;">
                                             <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete?');">Delete</button>
                                         </form>
                                     </div>

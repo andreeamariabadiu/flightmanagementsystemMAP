@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +22,7 @@ public class NoticeBoard implements Identifiable {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
-    // --- RELAȚIE OneToMany: Un panou are mai multe zboruri ---
+    // RELAȚIE: Un panou afișează mai multe zboruri
     @OneToMany(mappedBy = "noticeBoard", cascade = CascadeType.ALL)
     private List<Flight> flightsOfTheDay = new ArrayList<>();
 
@@ -34,11 +33,8 @@ public class NoticeBoard implements Identifiable {
         this.date = date;
     }
 
-    // Getters and Setters
-    @Override
-    public String getId() { return id; }
-    @Override
-    public void setId(String id) { this.id = id; }
+    @Override public String getId() { return id; }
+    @Override public void setId(String id) { this.id = id; }
 
     public LocalDate getDate() { return date; }
     public void setDate(LocalDate date) { this.date = date; }

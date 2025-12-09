@@ -8,8 +8,7 @@ import org.springframework.stereotype.Repository;
 public interface TicketRepository extends JpaRepository<Ticket, String> {
 
     // Verifică dacă locul este ocupat la un anumit zbor (pentru creare)
-    boolean existsByFlightIdAndSeatNumber(String flightId, String seatNumber);
+    boolean existsByFlight_IdAndSeatNumber(String flightId, String seatNumber);
 
-    // Verifică dacă locul este ocupat de ALTCINEVA la un anumit zbor (pentru editare)
-    boolean existsByFlightIdAndSeatNumberAndIdNot(String flightId, String seatNumber, String id);
+    boolean existsByFlight_IdAndSeatNumberAndIdNot(String flightId, String seatNumber, String id);
 }

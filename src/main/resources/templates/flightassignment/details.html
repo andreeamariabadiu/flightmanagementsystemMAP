@@ -3,123 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <title>Assignment Details</title>
-
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <style>
-        body {
-            background: linear-gradient(135deg, #020617, #0f172a);
-            min-height: 100vh;
-            color: #e5e7eb;
-        }
-
-        .page-wrapper {
-            padding-top: 4rem;
-            padding-bottom: 4rem;
-        }
-
-        .card-main {
-            background-color: #020617;
-            border-radius: 18px;
-            border: 1px solid rgba(148, 163, 184, 0.35);
-            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8);
-        }
-
-        .label-muted {
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: .09em;
-            color: #9ca3af;
-        }
-
-        .value-text {
-            font-size: 1.1rem;
-            color: #e5e7eb;
-            font-family: monospace;
-        }
+        body { background: linear-gradient(135deg, #020617, #0f172a); min-height: 100vh; color: #e5e7eb; }
+        .page-wrapper { padding-top: 4rem; padding-bottom: 4rem; }
+        .card-main { background-color: #020617; border-radius: 18px; border: 1px solid rgba(148, 163, 184, 0.35); }
+        .label-muted { font-size: 0.8rem; text-transform: uppercase; color: #9ca3af; }
+        .info-box { background: rgba(148, 163, 184, 0.1); border: 1px solid rgba(148, 163, 184, 0.2); padding: 0.75rem; border-radius: 8px; }
     </style>
 </head>
 <body>
-
-<nav class="navbar navbar-dark bg-transparent px-4 pt-3">
-    <div class="d-flex align-items-center gap-3">
-        <a href="/" class="btn btn-outline-light btn-sm rounded-pill px-3">
-            ⬅ Dashboard
-        </a>
-        <a href="/flight-assignments" class="btn btn-link text-light">
-            ← Back to Assignments
-        </a>
-    </div>
-</nav>
-
 <div class="container page-wrapper" th:object="${flightAssignment}">
     <div class="row justify-content-center">
         <div class="col-lg-6">
-            <div class="card card-main">
-
-                <div class="card-header border-0 pb-0 pt-4 px-4">
-                    <p class="label-muted mb-1">Flight Assignment</p>
-                    <h3 class="mb-0 text-light" th:text="'Assignment #' + *{id}">
-                        Assignment #123
-                    </h3>
+            <div class="card card-main p-4">
+                <div class="d-flex justify-content-between align-items-start mb-4">
+                    <div>
+                        <p class="label-muted mb-1">Assignment Details</p>
+                        <h3 class="mb-0 text-light" th:text="'ID: ' + *{id}"></h3>
+                    </div>
                 </div>
 
-                <div class="card-body px-4 pt-4 pb-4">
-
-                    <div class="row mb-3">
-                        <div class="col-md-6 mb-3 mb-md-0">
-                            <span class="label-muted d-block mb-1">Flight ID</span>
-                            <div class="p-2 rounded border border-secondary bg-dark bg-opacity-50">
-                                <span class="value-text text-info">✈ <span th:text="*{flightId}"></span></span>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <span class="label-muted d-block mb-1">Staff ID</span>
-                            <div class="p-2 rounded border border-secondary bg-dark bg-opacity-50">
-                                <span class="value-text text-warning">👤 <span th:text="*{staffId}"></span></span>
-                            </div>
+                <div class="row mb-3">
+                    <div class="col-12 mb-3">
+                        <div class="info-box">
+                            <span class="label-muted d-block">Flight</span>
+                            <span class="d-block fs-5 fw-bold text-info" th:text="*{flight.flightName}"></span>
+                            <span class="small text-muted" th:text="'Depart: ' + ${#temporals.format(flightAssignment.flight.departureTime, 'dd MMM yyyy HH:mm')}"></span>
                         </div>
                     </div>
-
-                    <div class="alert alert-secondary d-flex align-items-center mt-3" role="alert">
-                        <svg class="bi flex-shrink-0 me-2" width="24" height="24" role="img" aria-label="Info:" fill="currentColor" viewBox="0 0 16 16">
-                            <path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
-                        </svg>
-                        <div class="small">
-                            This assignment links Staff Member <strong>[[*{staffId}]]</strong> to Flight <strong>[[*{flightId}]]</strong>.
+                    <div class="col-12">
+                        <div class="info-box">
+                            <span class="label-muted d-block">Assigned Crew</span>
+                            <span class="d-block fs-5 fw-bold text-light" th:text="*{employee.name}"></span>
+                            <span class="badge bg-secondary" th:text="*{employee.role}"></span>
                         </div>
                     </div>
+                </div>
 
-                    <hr class="border-secondary mb-4 mt-4">
-
-                    <div class="d-flex justify-content-between">
-                        <a href="/flight-assignments" class="btn btn-outline-light">
-                            Back
-                        </a>
-
-                        <div>
-                            <a th:href="@{'/flight-assignments/' + *{id} + '/edit'}"
-                               class="btn btn-outline-primary me-2">
-                                Edit
-                            </a>
-                            <form th:action="@{'/flight-assignments/' + *{id} + '/delete'}"
-                                  method="post"
-                                  style="display:inline;">
-                                <button type="submit"
-                                        class="btn btn-outline-danger"
-                                        onclick="return confirm('Are you sure you want to remove this assignment?');">
-                                    Delete
-                                </button>
-                            </form>
-                        </div>
+                <hr class="border-secondary mt-4">
+                <div class="d-flex justify-content-between">
+                    <a href="/flight-assignments" class="btn btn-outline-light">Back</a>
+                    <div class="d-flex gap-2">
+                        <a th:href="@{'/flight-assignments/' + *{id} + '/edit'}" class="btn btn-outline-primary">Edit</a>
+                        <form th:action="@{'/flight-assignments/' + *{id} + '/delete'}" method="post">
+                            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete?');">Delete</button>
+                        </form>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

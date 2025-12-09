@@ -12,19 +12,18 @@ public class FlightAssignment implements Identifiable {
     @NotBlank(message = "ID can't be blank")
     private String id;
 
-    // --- RELAȚIE: ManyToOne cu Flight ---
+    // RELAȚIE: ManyToOne cu Flight
     @ManyToOne
     @JoinColumn(name = "flight_id", nullable = false)
     private Flight flight;
 
-    // --- RELAȚIE: ManyToOne cu AirlineEmployee ---
+    // RELAȚIE: ManyToOne cu AirlineEmployee
     @ManyToOne
     @JoinColumn(name = "employee_id", nullable = false)
     private AirlineEmployee employee;
 
     public FlightAssignment() {}
 
-    // Getters and Setters
     @Override public String getId() { return id; }
     @Override public void setId(String id) { this.id = id; }
 

@@ -18,7 +18,9 @@ public class FlightAssignmentService {
     private final FlightRepository flightRepo;
     private final AirlineEmployeeRepository employeeRepo;
 
-    public FlightAssignmentService(FlightAssignmentRepository repo, FlightRepository flightRepo, AirlineEmployeeRepository employeeRepo) {
+    public FlightAssignmentService(FlightAssignmentRepository repo,
+                                   FlightRepository flightRepo,
+                                   AirlineEmployeeRepository employeeRepo) {
         this.repo = repo;
         this.flightRepo = flightRepo;
         this.employeeRepo = employeeRepo;
@@ -27,28 +29,26 @@ public class FlightAssignmentService {
     private void validateRules(FlightAssignment fa, String currentId) {
         // 1. ID Unic
         if (currentId == null && repo.existsById(fa.getId())) {
-            throw new IllegalArgumentException("Assignment ID exists");
+            throw new IllegalArgumentException("Assignment ID " + fa.getId() + " already exists.");
         }
 
-        // 2. Dublă Alocare (Corectat apelul către Repository)
+        // 2. Dublă Alocare (Același om pe același zbor)
         boolean exists;
-        // Obținem ID-urile din obiectele populate anterior
         String fId = fa.getFlight().getId();
         String eId = fa.getEmployee().getId();
 
         if (currentId == null) {
-            // Apelează metoda nouă cu underscore
             exists = repo.existsByFlight_IdAndEmployee_Id(fId, eId);
         } else {
-            // Apelează metoda nouă cu underscore
             exists = repo.existsByFlight_IdAndEmployee_IdAndIdNot(fId, eId, currentId);
         }
 
         if (exists) {
-            throw new IllegalArgumentException("Employee already assigned to this flight.");
+            throw new IllegalArgumentException("Employee is already assigned to this flight.");
         }
     }
 
+    // CREATE
     public FlightAssignment createAssignment(FlightAssignment fa, String flightId, String employeeId) {
         Flight flight = flightRepo.findById(flightId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Flight ID"));
@@ -62,6 +62,7 @@ public class FlightAssignmentService {
         return repo.save(fa);
     }
 
+    // UPDATE
     public void updateAssignment(String id, FlightAssignment fa, String flightId, String employeeId) {
         Flight flight = flightRepo.findById(flightId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Flight ID"));
@@ -76,6 +77,7 @@ public class FlightAssignmentService {
         repo.save(fa);
     }
 
+    // CRUD
     public List<FlightAssignment> findAll() { return repo.findAll(); }
     public Optional<FlightAssignment> findById(String id) { return repo.findById(id); }
     public void delete(String id) {

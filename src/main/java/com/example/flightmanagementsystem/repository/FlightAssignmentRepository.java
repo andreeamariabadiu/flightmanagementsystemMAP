@@ -9,5 +9,6 @@ public interface FlightAssignmentRepository extends JpaRepository<FlightAssignme
 
     boolean existsByFlight_IdAndEmployee_Id(String flightId, String employeeId);
 
+    // Pentru update (exclude assignment-ul curent din verificare)
     boolean existsByFlight_IdAndEmployee_IdAndIdNot(String flightId, String employeeId, String id);
 }

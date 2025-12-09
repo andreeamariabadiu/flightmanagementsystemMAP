@@ -18,7 +18,9 @@ public class TicketController {
     private final FlightService flightService;
     private final PassengerService passengerService;
 
-    public TicketController(TicketService ticketService, FlightService flightService, PassengerService passengerService) {
+    public TicketController(TicketService ticketService,
+                            FlightService flightService,
+                            PassengerService passengerService) {
         this.ticketService = ticketService;
         this.flightService = flightService;
         this.passengerService = passengerService;
@@ -33,6 +35,7 @@ public class TicketController {
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("ticket", new Ticket());
+        // Trimitem listele pentru Dropdowns
         model.addAttribute("flights", flightService.findAll());
         model.addAttribute("passengers", passengerService.findAll());
         return "ticket/form";
@@ -42,8 +45,8 @@ public class TicketController {
     public String createTicket(
             @Valid @ModelAttribute("ticket") Ticket ticket,
             BindingResult bindingResult,
-            @RequestParam("flightId") String flightId,
-            @RequestParam("passengerId") String passengerId,
+            @RequestParam("flightId") String flightId,       // Din dropdown
+            @RequestParam("passengerId") String passengerId, // Din dropdown
             Model model
     ) {
         if (bindingResult.hasErrors()) {
@@ -51,6 +54,7 @@ public class TicketController {
             model.addAttribute("passengers", passengerService.findAll());
             return "ticket/form";
         }
+
         try {
             ticketService.createTicket(ticket, flightId, passengerId);
         } catch (IllegalArgumentException e) {
@@ -59,12 +63,15 @@ public class TicketController {
             model.addAttribute("passengers", passengerService.findAll());
             return "ticket/form";
         }
+
         return "redirect:/tickets";
     }
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable String id, Model model) {
-        Ticket t = ticketService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid ID"));
+        Ticket t = ticketService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ID: " + id));
+
         model.addAttribute("ticket", t);
         model.addAttribute("flights", flightService.findAll());
         model.addAttribute("passengers", passengerService.findAll());
@@ -85,6 +92,7 @@ public class TicketController {
             model.addAttribute("passengers", passengerService.findAll());
             return "ticket/form";
         }
+
         try {
             ticketService.updateTicket(id, ticket, flightId, passengerId);
         } catch (IllegalArgumentException e) {
@@ -93,10 +101,10 @@ public class TicketController {
             model.addAttribute("passengers", passengerService.findAll());
             return "ticket/form";
         }
+
         return "redirect:/tickets";
     }
 
-    // ... delete si details raman la fel ...
     @PostMapping("/{id}/delete")
     public String deleteTicket(@PathVariable String id) {
         ticketService.delete(id);
@@ -105,7 +113,8 @@ public class TicketController {
 
     @GetMapping("/{id}/details")
     public String showDetails(@PathVariable String id, Model model) {
-        Ticket t = ticketService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid ID"));
+        Ticket t = ticketService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ID: " + id));
         model.addAttribute("ticket", t);
         return "ticket/details";
     }
