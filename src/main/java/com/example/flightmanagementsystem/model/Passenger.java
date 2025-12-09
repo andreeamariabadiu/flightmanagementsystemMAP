@@ -3,7 +3,6 @@ package com.example.flightmanagementsystem.model;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
-
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,15 +21,12 @@ public class Passenger implements Identifiable {
 
     @Column(nullable = false, length = 3)
     @NotBlank(message = "Currency is required")
+    @Pattern(regexp = "^[A-Z]{3}$", message = "Currency must be 3 uppercase letters (e.g., USD)")
     private String currency;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "passenger_tickets",
-            joinColumns = @JoinColumn(name = "passenger_id")
-    )
-    @Column(name = "ticket_id")
-    private List<String> tickets = new ArrayList<>(); // Ticket IDs
+    // RELAȚIE: Un pasager cumpără mai multe bilete
+    @OneToMany(mappedBy = "passenger", cascade = CascadeType.ALL)
+    private List<Ticket> tickets = new ArrayList<>();
 
     public Passenger() {}
 
@@ -40,13 +36,8 @@ public class Passenger implements Identifiable {
         this.currency = currency;
     }
 
-    // Getters and Setters
-
-    @Override
-    public String getId() { return id; }
-
-    @Override
-    public void setId(String id) { this.id = id; }
+    @Override public String getId() { return id; }
+    @Override public void setId(String id) { this.id = id; }
 
     public String getName() { return name; }
     public void setName(String name) { this.name = name; }
@@ -54,6 +45,6 @@ public class Passenger implements Identifiable {
     public String getCurrency() { return currency; }
     public void setCurrency(String currency) { this.currency = currency; }
 
-    public List<String> getTickets() { return tickets; }
-    public void setTickets(List<String> tickets) { this.tickets = tickets; }
+    public List<Ticket> getTickets() { return tickets; }
+    public void setTickets(List<Ticket> tickets) { this.tickets = tickets; }
 }

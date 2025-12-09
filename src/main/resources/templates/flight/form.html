@@ -2,49 +2,17 @@
 <html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title th:text="${flight.id == null || flight.id == ''} ? 'Schedule Flight' : 'Edit Flight'">
-        Flight
-    </title>
-
+    <title th:text="${flight.id == null || flight.id == ''} ? 'Schedule Flight' : 'Edit Flight'">Flight</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-
     <style>
-        body {
-            background: linear-gradient(135deg, #020617, #1e293b);
-            min-height: 100vh;
-            color: #e5e7eb;
-        }
-
+        body { background: linear-gradient(135deg, #020617, #1e293b); min-height: 100vh; color: #e5e7eb; }
         .page-wrapper { padding-top: 4rem; padding-bottom: 4rem; }
-
-        .card-main {
-            background-color: #020617;
-            border-radius: 18px;
-            border: 1px solid rgba(148, 163, 184, 0.3);
-            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8);
-        }
-
-        .form-control, .form-select {
-            background-color: #020617;
-            border: 1px solid rgba(148, 163, 184, 0.6);
-            color: #e5e7eb;
-        }
-
-        .form-control:focus, .form-select:focus {
-            background-color: #020617;
-            color: #e5e7eb;
-            border-color: #60a5fa;
-            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.35);
-        }
-
-        /* Dark mode calendar icon fix for datetime inputs */
-        input[type="datetime-local"] {
-            color-scheme: dark;
-        }
-
+        .card-main { background-color: #020617; border-radius: 18px; border: 1px solid rgba(148, 163, 184, 0.3); box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8); }
+        .form-control, .form-select { background-color: #020617; border: 1px solid rgba(148, 163, 184, 0.6); color: #e5e7eb; }
+        .form-control:focus, .form-select:focus { background-color: #020617; color: #e5e7eb; border-color: #60a5fa; box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.35); }
+        input[type="datetime-local"] { color-scheme: dark; }
         .invalid-feedback { color: #ef4444; display: block; }
         .form-control.is-invalid, .form-select.is-invalid { border-color: #ef4444; }
-
         .text-muted-soft { color: #9ca3af; font-size: 0.85rem; }
         .btn-primary { border-radius: 999px; padding-inline: 1.5rem; }
         .btn-outline-light { border-radius: 999px; }
@@ -53,9 +21,7 @@
 <body>
 
 <nav class="navbar navbar-dark bg-transparent px-4 pt-3">
-    <a class="navbar-brand" href="/" style="font-size: 1.1rem; font-weight: 700;">
-        ✈ Flight Management System
-    </a>
+    <a class="navbar-brand" href="/">✈ Flight Management System</a>
     <div class="d-flex gap-2">
         <a href="/" class="btn btn-outline-light btn-sm">← Dashboard</a>
         <a href="/flights" class="btn btn-outline-light btn-sm">↩ Back to Flights</a>
@@ -67,17 +33,12 @@
         <div class="col-lg-8">
             <div class="card card-main">
                 <div class="card-header border-0 px-4 pt-4 pb-2">
-                    <h3 class="mb-1" th:text="${flight.id == null || flight.id == ''} ? 'Schedule Flight' : 'Edit Flight'">
-                        Schedule Flight
-                    </h3>
+                    <h3 class="mb-1" th:text="${flight.id == null || flight.id == ''} ? 'Schedule Flight' : 'Edit Flight'">Schedule Flight</h3>
                     <p class="text-muted-soft mb-0">Manage times, aircraft, and route details.</p>
                 </div>
 
                 <div class="card-body px-4 pb-4 pt-3">
-
-                    <form th:object="${flight}"
-                          th:action="${flight.id == null || flight.id == ''} ? @{/flights} : @{/flights/{id}(id=${flight.id})}"
-                          method="post">
+                    <form th:object="${flight}" th:action="${flight.id == null || flight.id == ''} ? @{/flights} : @{/flights/{id}(id=${flight.id})}" method="post">
 
                         <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
                             <p class="mb-0" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
@@ -85,25 +46,19 @@
 
                         <div class="mb-3">
                             <label class="form-label">Flight ID</label>
-                            <input type="text" class="form-control" th:field="*{id}"
-                                   th:readonly="${flight.id != null && flight.id != ''}"
-                                   th:classappend="${#fields.hasErrors('id')} ? 'is-invalid' : ''"
-                                   placeholder="e.g. F-2024-NY"/>
+                            <input type="text" class="form-control" th:field="*{id}" th:readonly="${flight.id != null && flight.id != ''}" th:classappend="${#fields.hasErrors('id')} ? 'is-invalid' : ''" placeholder="e.g. F-2024-NY"/>
                             <div class="invalid-feedback" th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Flight Name</label>
-                                <input type="text" class="form-control" th:field="*{flightName}"
-                                       th:classappend="${#fields.hasErrors('flightName')} ? 'is-invalid' : ''"
-                                       placeholder="e.g. New York to London"/>
+                                <input type="text" class="form-control" th:field="*{flightName}" th:classappend="${#fields.hasErrors('flightName')} ? 'is-invalid' : ''" placeholder="e.g. New York to London"/>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('flightName')}" th:errors="*{flightName}"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Status</label>
-                                <select class="form-select" th:field="*{status}"
-                                        th:classappend="${#fields.hasErrors('status')} ? 'is-invalid' : ''">
+                                <select class="form-select" th:field="*{status}" th:classappend="${#fields.hasErrors('status')} ? 'is-invalid' : ''">
                                     <option value="" disabled>-- Select Status --</option>
                                     <option th:each="s : ${statuses}" th:value="${s}" th:text="${s}"></option>
                                 </select>
@@ -114,49 +69,44 @@
                         <div class="row mb-3">
                             <div class="col-md-6">
                                 <label class="form-label">Departure Time</label>
-                                <input type="datetime-local" class="form-control" th:field="*{departureTime}"
-                                       th:classappend="${#fields.hasErrors('departureTime')} ? 'is-invalid' : ''"/>
+                                <input type="datetime-local" class="form-control" th:field="*{departureTime}" th:classappend="${#fields.hasErrors('departureTime')} ? 'is-invalid' : ''"/>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('departureTime')}" th:errors="*{departureTime}"></div>
                             </div>
                             <div class="col-md-6">
                                 <label class="form-label">Arrival Time</label>
-                                <input type="datetime-local" class="form-control" th:field="*{arrivalTime}"
-                                       th:classappend="${#fields.hasErrors('arrivalTime')} ? 'is-invalid' : ''"/>
+                                <input type="datetime-local" class="form-control" th:field="*{arrivalTime}" th:classappend="${#fields.hasErrors('arrivalTime')} ? 'is-invalid' : ''"/>
                                 <div class="invalid-feedback" th:if="${#fields.hasErrors('arrivalTime')}" th:errors="*{arrivalTime}"></div>
                             </div>
                         </div>
 
                         <div class="row mb-3">
                             <div class="col-md-6">
-                                <label class="form-label">Airplane ID</label>
-                                <input type="text" class="form-control" th:field="*{airplaneId}"
-                                       th:classappend="${#fields.hasErrors('airplaneId')} ? 'is-invalid' : ''"
-                                       placeholder="e.g. AP-101"/>
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('airplaneId')}" th:errors="*{airplaneId}"></div>
+                                <label class="form-label">Airplane</label>
+                                <select class="form-select" name="airplaneId" required>
+                                    <option value="" disabled th:selected="${flight.airplane == null}">-- Select Airplane --</option>
+
+                                    <option th:each="plane : ${airplanes}"
+                                            th:value="${plane.id}"
+                                            th:text="'Tail: ' + ${plane.id} + ' (No. ' + ${plane.airplaneNumber} + ')'"
+                                            th:selected="${flight.airplane != null && flight.airplane.id == plane.id}">
+                                    </option>
+                                </select>
+                                <div class="text-muted-soft mt-1">Select the aircraft.</div>
                             </div>
+
                             <div class="col-md-6">
-                                <label class="form-label">Notice Board ID</label>
-                                <input type="text" class="form-control" th:field="*{noticeBoardId}"
-                                       th:classappend="${#fields.hasErrors('noticeBoardId')} ? 'is-invalid' : ''"
-                                       placeholder="e.g. NB-MAIN"/>
-                                <div class="invalid-feedback" th:if="${#fields.hasErrors('noticeBoardId')}" th:errors="*{noticeBoardId}"></div>
+                                <label class="form-label">Daily Schedule (Notice Board)</label>
+                                <select class="form-select" name="noticeBoardId" required>
+                                    <option value="" disabled th:selected="${flight.noticeBoard == null}">-- Select Date --</option>
+
+                                    <option th:each="nb : ${noticeBoards}"
+                                            th:value="${nb.id}"
+                                            th:text="${nb.date} + ' (ID: ' + ${nb.id} + ')'"
+                                            th:selected="${flight.noticeBoard != null && flight.noticeBoard.id == nb.id}">
+                                    </option>
+                                </select>
+                                <div class="text-muted-soft mt-1">Select the schedule board.</div>
                             </div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Flight Assignment IDs</label>
-                            <input type="text" class="form-control" th:field="*{flightAssignments}"
-                                   th:classappend="${#fields.hasErrors('flightAssignments')} ? 'is-invalid' : ''"
-                                   placeholder="e.g. ASN-01, ASN-02"/>
-                            <div class="text-muted-soft mt-1">Comma-separated IDs of staff assignments.</div>
-                        </div>
-
-                        <div class="mb-3">
-                            <label class="form-label">Ticket IDs</label>
-                            <input type="text" class="form-control" th:field="*{tickets}"
-                                   th:classappend="${#fields.hasErrors('tickets')} ? 'is-invalid' : ''"
-                                   placeholder="e.g. TKT-001, TKT-002"/>
-                            <div class="text-muted-soft mt-1">Comma-separated IDs of sold tickets.</div>
                         </div>
 
                         <div class="d-flex justify-content-between mt-4">

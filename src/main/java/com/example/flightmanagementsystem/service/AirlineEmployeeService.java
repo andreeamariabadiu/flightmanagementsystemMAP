@@ -1,62 +1,58 @@
 package com.example.flightmanagementsystem.service;
 
-
 import com.example.flightmanagementsystem.model.AirlineEmployee;
 import com.example.flightmanagementsystem.repository.AirlineEmployeeRepository;
-import com.example.flightmanagementsystem.repository.FlightRepository;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class AirlineEmployeeService {
-    private final AirlineEmployeeRepository airlineEmployeeRepository;
+    private final AirlineEmployeeRepository repository;
 
-    public AirlineEmployeeService(AirlineEmployeeRepository airlineEmployeeRepository) {
-        this.airlineEmployeeRepository = airlineEmployeeRepository;
+    public AirlineEmployeeService(AirlineEmployeeRepository repository) {
+        this.repository = repository;
     }
 
-    private void validateBusinessRules(AirlineEmployee employee, String currentId) {
-
-        //  Unique License check
-        boolean licenseUsed;
+    private void validateRules(AirlineEmployee emp, String currentId) {
+        // 1. ID Unic
+        if (currentId == null && repository.existsById(emp.getId())) {
+            throw new IllegalArgumentException("Employee ID " + emp.getId() + " is already in use.");
+        }
+        // 2. Licență Unică
+        boolean licenseExists;
         if (currentId == null) {
-            licenseUsed = airlineEmployeeRepository.existsByLicenseNumber(employee.getLicenseNumber());
+            licenseExists = repository.existsByLicenseNumber(emp.getLicenseNumber());
         } else {
-            licenseUsed = airlineEmployeeRepository.existsByLicenseNumberAndIdNot(employee.getLicenseNumber(), currentId);
+            licenseExists = repository.existsByLicenseNumberAndIdNot(emp.getLicenseNumber(), currentId);
         }
-
-        if (licenseUsed) {
-            throw new IllegalArgumentException("This license number is already used by another employee.");
+        if (licenseExists) {
+            throw new IllegalArgumentException("License Number " + emp.getLicenseNumber() + " is already registered.");
         }
     }
 
-    public AirlineEmployee save(AirlineEmployee a) {
-        validateBusinessRules(a, null);
-        return airlineEmployeeRepository.save(a);
+    public AirlineEmployee save(AirlineEmployee emp) {
+        validateRules(emp, null);
+        return repository.save(emp);
     }
 
-    public void updateEmployee(String id, AirlineEmployee update) {
-        validateBusinessRules(update, id);
+    public void update(String id, AirlineEmployee update) {
+        // Păstrăm referința la ID
         update.setId(id);
-        airlineEmployeeRepository.save(update);
+        // ATENȚIE: Nu suprascriem lista de 'assignments' aici, JPA se ocupă de ea.
+        // Validăm doar datele scalare (nume, rol, licență)
+        validateRules(update, id);
+        repository.save(update);
     }
 
     public boolean delete(String id) {
-        if (airlineEmployeeRepository.existsById(id)) {
-            airlineEmployeeRepository.deleteById(id);
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
             return true;
         }
         return false;
     }
 
-    public List<AirlineEmployee> findAll() {
-        return airlineEmployeeRepository.findAll();
-    }
-
-    public Optional<AirlineEmployee> findById(String id) {
-        return airlineEmployeeRepository.findById(id);
-    }
-
+    public List<AirlineEmployee> findAll() { return repository.findAll(); }
+    public Optional<AirlineEmployee> findById(String id) { return repository.findById(id); }
 }

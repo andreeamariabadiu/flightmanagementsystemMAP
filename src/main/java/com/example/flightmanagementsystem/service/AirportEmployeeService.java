@@ -1,52 +1,47 @@
 package com.example.flightmanagementsystem.service;
 
-import com.example.flightmanagementsystem.model.AirlineEmployee;
 import com.example.flightmanagementsystem.model.AirportEmployee;
 import com.example.flightmanagementsystem.repository.AirportEmployeeRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.Optional;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 public class AirportEmployeeService {
-    private final AirportEmployeeRepository airportEmployeeRepository;
 
-    public AirportEmployeeService(AirportEmployeeRepository airportEmployeeRepository) {
-        this.airportEmployeeRepository = airportEmployeeRepository;
+    private final AirportEmployeeRepository repository;
+
+    public AirportEmployeeService(AirportEmployeeRepository repository) {
+        this.repository = repository;
     }
 
-    private void validateBusinessRules(AirportEmployee employee, String currentId) {
-
-        // Rule 1: Unique ID Check (on Create only)
-        if (currentId == null && airportEmployeeRepository.existsById(employee.getId())) {
-            throw new IllegalArgumentException("Employee ID " + employee.getId() + " already exists.");
+    private void validateRules(AirportEmployee emp, String currentId) {
+        // Regula: ID Unic
+        if (currentId == null && repository.existsById(emp.getId())) {
+            throw new IllegalArgumentException("Employee ID " + emp.getId() + " is already in use.");
         }
     }
 
-    public AirportEmployee save(AirportEmployee a) {
-        return airportEmployeeRepository.save(a);
+    public AirportEmployee save(AirportEmployee emp) {
+        validateRules(emp, null);
+        return repository.save(emp);
+    }
+
+    public void update(String id, AirportEmployee emp) {
+        validateRules(emp, id);
+        emp.setId(id);
+        repository.save(emp);
     }
 
     public boolean delete(String id) {
-        if (airportEmployeeRepository.existsById(id)) {
-            airportEmployeeRepository.deleteById(id);
+        if (repository.existsById(id)) {
+            repository.deleteById(id);
             return true;
         }
         return false;
     }
 
-    public Optional<AirportEmployee> findById(String id) {
-        return airportEmployeeRepository.findById(id);
-    }
-
-    public List<AirportEmployee> findAll() {
-        return airportEmployeeRepository.findAll();
-    }
-
-    public void updateEmployee(String id, AirportEmployee update) {
-        update.setId(id);
-        airportEmployeeRepository.save(update);
-    }
-
+    public List<AirportEmployee> findAll() { return repository.findAll(); }
+    public Optional<AirportEmployee> findById(String id) { return repository.findById(id); }
 }

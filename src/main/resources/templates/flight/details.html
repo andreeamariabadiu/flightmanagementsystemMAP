@@ -11,14 +11,7 @@
         .card-main { background-color: #020617; border-radius: 18px; border: 1px solid rgba(148, 163, 184, 0.35); }
         .label-muted { font-size: 0.8rem; text-transform: uppercase; letter-spacing: .09em; color: #9ca3af; }
         .value-text { font-size: 1.1rem; color: #e5e7eb; }
-
-        .time-box {
-            background: rgba(148, 163, 184, 0.1);
-            border: 1px solid rgba(148, 163, 184, 0.2);
-            padding: 1rem;
-            border-radius: 12px;
-            text-align: center;
-        }
+        .time-box { background: rgba(148, 163, 184, 0.1); border: 1px solid rgba(148, 163, 184, 0.2); padding: 1rem; border-radius: 12px; text-align: center; }
     </style>
 </head>
 <body>
@@ -56,10 +49,8 @@
                         <div class="col-md-5">
                             <div class="time-box">
                                 <span class="label-muted d-block">Departure</span>
-                                <span class="d-block fs-5 fw-bold text-info"
-                                      th:text="${#temporals.format(flight.departureTime, 'HH:mm')}"></span>
-                                <span class="small text-muted"
-                                      th:text="${#temporals.format(flight.departureTime, 'MMM dd, yyyy')}"></span>
+                                <span class="d-block fs-5 fw-bold text-info" th:text="${#temporals.format(flight.departureTime, 'HH:mm')}"></span>
+                                <span class="small text-muted" th:text="${#temporals.format(flight.departureTime, 'MMM dd, yyyy')}"></span>
                             </div>
                         </div>
                         <div class="col-md-2 d-flex align-items-center justify-content-center">
@@ -68,10 +59,8 @@
                         <div class="col-md-5">
                             <div class="time-box">
                                 <span class="label-muted d-block">Arrival</span>
-                                <span class="d-block fs-5 fw-bold text-warning"
-                                      th:text="${#temporals.format(flight.arrivalTime, 'HH:mm')}"></span>
-                                <span class="small text-muted"
-                                      th:text="${#temporals.format(flight.arrivalTime, 'MMM dd, yyyy')}"></span>
+                                <span class="d-block fs-5 fw-bold text-warning" th:text="${#temporals.format(flight.arrivalTime, 'HH:mm')}"></span>
+                                <span class="small text-muted" th:text="${#temporals.format(flight.arrivalTime, 'MMM dd, yyyy')}"></span>
                             </div>
                         </div>
                     </div>
@@ -79,26 +68,38 @@
                     <div class="row mb-4">
                         <div class="col-6">
                             <span class="label-muted d-block">Airplane ID</span>
-                            <span class="value-text" th:text="*{airplaneId}"></span>
+                            <span class="value-text" th:text="*{airplane != null ? airplane.id : 'N/A'}"></span>
                         </div>
                         <div class="col-6">
-                            <span class="label-muted d-block">NoticeBoard ID</span>
-                            <span class="value-text" th:text="*{noticeBoardId}"></span>
+                            <span class="label-muted d-block">NoticeBoard</span>
+                            <span class="value-text" th:text="*{noticeBoard != null ? #temporals.format(noticeBoard.date, 'yyyy-MM-dd') : 'N/A'}"></span>
                         </div>
                     </div>
 
+                    <hr class="border-secondary mb-4">
+
                     <div class="mb-3">
-                        <span class="label-muted d-block">Assigned Staff (IDs)</span>
-                        <span class="text-light" th:if="*{flightAssignments.isEmpty()}">None</span>
-                        <span class="badge bg-dark border border-secondary me-1"
-                              th:each="a : *{flightAssignments}" th:text="${a}"></span>
+                        <span class="label-muted d-block mb-2">Assigned Staff</span>
+                        <div th:if="*{flightAssignments != null and !flightAssignments.isEmpty()}">
+                            <ul class="list-group list-group-flush border border-secondary rounded">
+                                <li class="list-group-item bg-dark bg-opacity-25 text-light border-secondary"
+                                    th:each="assign : *{flightAssignments}">
+                                    👤 <span th:text="${assign.employee.name}"></span>
+                                    <span class="text-muted small ms-2" th:text="'(' + ${assign.employee.role} + ')'"></span>
+                                </li>
+                            </ul>
+                        </div>
+                        <span class="text-muted fst-italic" th:if="*{flightAssignments == null or flightAssignments.isEmpty()}">No staff assigned yet.</span>
                     </div>
 
                     <div class="mb-4">
-                        <span class="label-muted d-block">Tickets (IDs)</span>
-                        <span class="text-light" th:if="*{tickets.isEmpty()}">None</span>
-                        <span class="badge bg-dark border border-secondary me-1"
-                              th:each="t : *{tickets}" th:text="${t}"></span>
+                        <span class="label-muted d-block mb-2">Tickets Sold</span>
+                        <div th:if="*{tickets != null and !tickets.isEmpty()}">
+                            <span class="badge bg-dark border border-secondary me-1 mb-1"
+                                  th:each="t : *{tickets}"
+                                  th:text="'🎫 ' + ${t.seatNumber} + ' (' + ${t.passenger.name} + ')'"></span>
+                        </div>
+                        <span class="text-muted fst-italic" th:if="*{tickets == null or tickets.isEmpty()}">No tickets sold.</span>
                     </div>
 
                     <hr class="border-secondary mb-4">
@@ -108,8 +109,7 @@
                         <div>
                             <a th:href="@{'/flights/' + *{id} + '/edit'}" class="btn btn-outline-primary me-2">Edit</a>
                             <form th:action="@{'/flights/' + *{id} + '/delete'}" method="post" style="display:inline;">
-                                <button type="submit" class="btn btn-outline-danger"
-                                        onclick="return confirm('Delete this flight?');">Delete</button>
+                                <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete this flight?');">Delete</button>
                             </form>
                         </div>
                     </div>

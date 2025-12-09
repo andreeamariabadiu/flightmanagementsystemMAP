@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.format.annotation.DateTimeFormat;
-
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,13 +22,9 @@ public class NoticeBoard implements Identifiable {
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate date;
 
-    @ElementCollection
-    @CollectionTable(
-            name = "noticeboard_flights",
-            joinColumns = @JoinColumn(name = "noticeboard_id")
-    )
-    @Column(name = "flight_id")
-    private List<String> flightsOfTheDay = new ArrayList<>(); // Flight IDs
+    // RELAȚIE: Un panou afișează mai multe zboruri
+    @OneToMany(mappedBy = "noticeBoard", cascade = CascadeType.ALL)
+    private List<Flight> flightsOfTheDay = new ArrayList<>();
 
     public NoticeBoard() {}
 
@@ -38,19 +33,12 @@ public class NoticeBoard implements Identifiable {
         this.date = date;
     }
 
-    // Getters and Setters
-
-    @Override
-    public String getId() { return id; }
-
-    @Override
-    public void setId(String id) { this.id = id; }
+    @Override public String getId() { return id; }
+    @Override public void setId(String id) { this.id = id; }
 
     public LocalDate getDate() { return date; }
-
     public void setDate(LocalDate date) { this.date = date; }
 
-    public List<String> getFlightsOfTheDay() { return flightsOfTheDay; }
-
-    public void setFlightsOfTheDay(List<String> flightsOfTheDay) { this.flightsOfTheDay = flightsOfTheDay; }
+    public List<Flight> getFlightsOfTheDay() { return flightsOfTheDay; }
+    public void setFlightsOfTheDay(List<Flight> flightsOfTheDay) { this.flightsOfTheDay = flightsOfTheDay; }
 }

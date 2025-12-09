@@ -13,9 +13,10 @@ public class Luggage implements Identifiable {
     @NotBlank(message = "Id can't be blank")
     private String id;
 
-    @Column(name = "ticket_id", nullable = false, length = 64)
-    @NotBlank(message = "Ticket ID can't be blank")
-    private String ticketId;
+    // RELAȚIE: ManyToOne cu Ticket
+    @ManyToOne
+    @JoinColumn(name = "ticket_id", nullable = false)
+    private Ticket ticket;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
@@ -30,22 +31,11 @@ public class Luggage implements Identifiable {
 
     public Luggage() {}
 
-    public Luggage(String id, String ticketId, Status status) {
-        this.id = id;
-        this.ticketId = ticketId;
-        this.status = status;
-    }
+    @Override public String getId() { return id; }
+    @Override public void setId(String id) { this.id = id; }
 
-    // Getters and Setters
-
-    @Override
-    public String getId() { return id; }
-
-    @Override
-    public void setId(String id) { this.id = id; }
-
-    public String getTicketId() { return ticketId; }
-    public void setTicketId(String ticketId) { this.ticketId = ticketId; }
+    public Ticket getTicket() { return ticket; }
+    public void setTicket(Ticket ticket) { this.ticket = ticket; }
 
     public Status getStatus() { return status; }
     public void setStatus(Status status) { this.status = status; }

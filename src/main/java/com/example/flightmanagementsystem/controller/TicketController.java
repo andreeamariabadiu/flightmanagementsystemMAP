@@ -1,6 +1,8 @@
 package com.example.flightmanagementsystem.controller;
 
 import com.example.flightmanagementsystem.model.Ticket;
+import com.example.flightmanagementsystem.service.FlightService;
+import com.example.flightmanagementsystem.service.PassengerService;
 import com.example.flightmanagementsystem.service.TicketService;
 import jakarta.validation.Valid;
 import org.springframework.stereotype.Controller;
@@ -13,93 +15,106 @@ import org.springframework.web.bind.annotation.*;
 public class TicketController {
 
     private final TicketService ticketService;
+    private final FlightService flightService;
+    private final PassengerService passengerService;
 
-    public TicketController(TicketService ticketService) {
+    public TicketController(TicketService ticketService,
+                            FlightService flightService,
+                            PassengerService passengerService) {
         this.ticketService = ticketService;
+        this.flightService = flightService;
+        this.passengerService = passengerService;
     }
 
-    // Listare
     @GetMapping
     public String listTickets(Model model) {
         model.addAttribute("tickets", ticketService.findAll());
         return "ticket/index";
     }
 
-    // Formular Creare
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("ticket", new Ticket());
+        // Trimitem listele pentru Dropdowns
+        model.addAttribute("flights", flightService.findAll());
+        model.addAttribute("passengers", passengerService.findAll());
         return "ticket/form";
     }
 
-    // Procesare Creare
     @PostMapping
     public String createTicket(
             @Valid @ModelAttribute("ticket") Ticket ticket,
             BindingResult bindingResult,
+            @RequestParam("flightId") String flightId,       // Din dropdown
+            @RequestParam("passengerId") String passengerId, // Din dropdown
             Model model
     ) {
-        // 1. Validări standard (@NotBlank, @NotNull, @DecimalMin)
         if (bindingResult.hasErrors()) {
+            model.addAttribute("flights", flightService.findAll());
+            model.addAttribute("passengers", passengerService.findAll());
             return "ticket/form";
         }
 
-        // 2. Validări de Business (ID unic, Loc ocupat)
         try {
-            ticketService.save(ticket);
+            ticketService.createTicket(ticket, flightId, passengerId);
         } catch (IllegalArgumentException e) {
-            // Adăugăm eroarea globală pentru a fi afișată în formular
             bindingResult.reject("global.error", e.getMessage());
+            model.addAttribute("flights", flightService.findAll());
+            model.addAttribute("passengers", passengerService.findAll());
             return "ticket/form";
         }
 
         return "redirect:/tickets";
     }
 
-    // Formular Editare
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable String id, Model model) {
         Ticket t = ticketService.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid ticket ID " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ID: " + id));
 
         model.addAttribute("ticket", t);
+        model.addAttribute("flights", flightService.findAll());
+        model.addAttribute("passengers", passengerService.findAll());
         return "ticket/form";
     }
 
-    // Procesare Editare
     @PostMapping("/{id}")
     public String updateTicket(
             @PathVariable String id,
             @Valid @ModelAttribute("ticket") Ticket ticket,
             BindingResult bindingResult,
+            @RequestParam("flightId") String flightId,
+            @RequestParam("passengerId") String passengerId,
             Model model
     ) {
         if (bindingResult.hasErrors()) {
+            model.addAttribute("flights", flightService.findAll());
+            model.addAttribute("passengers", passengerService.findAll());
             return "ticket/form";
         }
 
         try {
-            ticketService.updateTicket(id, ticket);
+            ticketService.updateTicket(id, ticket, flightId, passengerId);
         } catch (IllegalArgumentException e) {
             bindingResult.reject("global.error", e.getMessage());
+            model.addAttribute("flights", flightService.findAll());
+            model.addAttribute("passengers", passengerService.findAll());
             return "ticket/form";
         }
 
         return "redirect:/tickets";
     }
 
-    // Ștergere
     @PostMapping("/{id}/delete")
     public String deleteTicket(@PathVariable String id) {
         ticketService.delete(id);
         return "redirect:/tickets";
     }
 
-    // Detalii
     @GetMapping("/{id}/details")
     public String showDetails(@PathVariable String id, Model model) {
         Ticket t = ticketService.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid ticket ID " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ID: " + id));
         model.addAttribute("ticket", t);
         return "ticket/details";
     }
