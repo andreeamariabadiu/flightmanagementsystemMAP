@@ -1,57 +1,210 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Add Airplane | Flight Management System</title>
+    <title th:text="${airplane.id == null || airplane.id == ''} ? 'New Airplane' : 'Edit Airplane'">
+        Airplane
+    </title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet">
 
     <style>
-        body { background: linear-gradient(135deg,#0f172a,#1e293b); min-height:100vh; color:#e5e7eb; }
-        .page-wrapper { padding-top:4rem; padding-bottom:4rem; }
-        .form-card {
-            background:#020617; border-radius:18px;
-            border:1px solid rgba(148,163,184,0.3);
-            box-shadow:0 24px 60px rgba(15,23,42,0.8);
+        body {
+            background: linear-gradient(135deg, #020617, #1e293b);
+            min-height: 100vh;
+            color: #e5e7eb;
         }
-        input { background:#1e293b!important; color:#e5e7eb!important; }
-        label { font-weight:500; }
-        .btn-primary { border-radius:999px; }
+
+        .navbar-brand {
+            font-weight: 700;
+            letter-spacing: 0.06em;
+        }
+
+        .page-wrapper {
+            padding-top: 4rem;
+            padding-bottom: 4rem;
+        }
+
+        .card-main {
+            background-color: #020617;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.3);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8);
+        }
+
+        .form-label {
+            font-weight: 500;
+            color: #e5e7eb;
+        }
+
+        .form-control,
+        .form-select {
+            background-color: #020617;
+            border: 1px solid rgba(148, 163, 184, 0.6);
+            color: #e5e7eb;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background-color: #020617;
+            color: #e5e7eb;
+            border-color: #60a5fa;
+            box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.35);
+        }
+
+        /* Error Text Color */
+        .invalid-feedback {
+            color: #ef4444;
+            display: block;
+        }
+
+        /* Red Border for Errors */
+        .form-control.is-invalid, .form-select.is-invalid {
+            border-color: #ef4444;
+            padding-right: calc(1.5em + 0.75rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23ef4444'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5zM6 7.5h.01'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.1875rem) center;
+            background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+        }
+
+        .text-muted-soft {
+            color: #9ca3af;
+            font-size: 0.85rem;
+        }
+
+        .btn-primary {
+            border-radius: 999px;
+            padding-inline: 1.5rem;
+        }
+
+        .btn-outline-light {
+            border-radius: 999px;
+        }
+
+        .badge-pill-soft {
+            background: rgba(31, 41, 55, 0.7);
+            border-radius: 999px;
+            padding: 0.15rem 0.6rem;
+            font-size: 0.75rem;
+            color: #e5e7eb;
+        }
     </style>
 </head>
 <body>
 
+<nav class="navbar navbar-dark bg-transparent px-4 pt-3">
+    <a class="navbar-brand" href="/" style="font-size: 1.1rem;">
+        ✈ Flight Management System
+    </a>
+
+    <div class="d-flex gap-2">
+        <a href="/" class="btn btn-outline-light btn-sm">
+            ← Back to Dashboard
+        </a>
+        <a href="/airplanes" class="btn btn-outline-light btn-sm">
+            ↩ Back to Airplanes
+        </a>
+    </div>
+</nav>
+
 <div class="container page-wrapper">
     <div class="row justify-content-center">
-        <div class="col-lg-6">
-            <div class="card form-card p-4">
-
-                <h3 class="text-light mb-3">Register New Airplane</h3>
-
-                <form action="/airplanes" method="post">
-
-                    <div class="mb-3">
-                        <label>ID</label>
-                        <input class="form-control" name="id" required>
+        <div class="col-lg-8">
+            <div class="card card-main">
+                <div class="card-header border-0 px-4 pt-4 pb-2 d-flex justify-content-between align-items-center">
+                    <div>
+                        <h3 class="mb-1" th:text="${airplane.id == null || airplane.id == ''} ? 'Create Airplane' : 'Edit Airplane'">
+                            Create Airplane
+                        </h3>
+                        <p class="text-muted-soft mb-0">
+                            Manage fleet details, number and assigned flights.
+                        </p>
                     </div>
+                    <span class="badge-pill-soft"
+                          th:text="${airplane.id == null || airplane.id == ''} ? 'NEW' : 'EDITING'">
+                        NEW
+                    </span>
+                </div>
 
-                    <div class="mb-3">
-                        <label>Airplane Number</label>
-                        <input type="number" class="form-control" name="airplaneNumber" required>
-                    </div>
+                <div class="card-body px-4 pb-4 pt-3">
 
-                    <div class="mb-3">
-                        <label>Assigned Flights (comma-separated)</label>
-                        <input class="form-control" name="flights">
-                    </div>
+                    <form th:object="${airplane}"
+                          th:action="${airplane.id == null || airplane.id == ''} ?
+                                     @{/airplanes} :
+                                     @{/airplanes/{id}(id=${airplane.id})}"
+                          method="post">
 
-                    <div class="d-flex justify-content-between mt-4">
-                        <a href="/airplanes" class="btn btn-outline-light">Cancel</a>
-                        <button class="btn btn-primary">Save Airplane</button>
-                    </div>
+                        <div th:if="${#fields.hasGlobalErrors()}" class="alert alert-danger">
+                            <p class="mb-0" th:each="err : ${#fields.globalErrors()}" th:text="${err}"></p>
+                        </div>
 
-                </form>
+                        <div class="mb-3">
+                            <label class="form-label" for="id">Airplane ID (Tail Code)</label>
+                            <input type="text"
+                                   id="id"
+                                   class="form-control"
+                                   th:field="*{id}"
+                                   th:classappend="${#fields.hasErrors('id')} ? 'is-invalid' : ''"
+                                   th:readonly="${airplane.id != null && airplane.id != ''}"
+                                   placeholder="e.g. AP-770"/>
 
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('id')}" th:errors="*{id}"></div>
+
+                            <div class="text-muted-soft mt-1" th:unless="${#fields.hasErrors('id')}">
+                                Unique string identifier for the database.
+                                <span th:if="${airplane.id != null && airplane.id != ''}">
+                                    (Cannot be changed when editing.)
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="airplaneNumber">Airplane Number</label>
+                            <input type="number"
+                                   id="airplaneNumber"
+                                   class="form-control"
+                                   th:field="*{airplaneNumber}"
+                                   th:classappend="${#fields.hasErrors('airplaneNumber')} ? 'is-invalid' : ''"
+                                   placeholder="e.g. 101" />
+
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('airplaneNumber')}" th:errors="*{airplaneNumber}"></div>
+                            <div class="text-muted-soft mt-1" th:unless="${#fields.hasErrors('airplaneNumber')}">
+                                Must be a positive integer and unique across the fleet.
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label" for="flights">Assigned Flight IDs</label>
+                            <input type="text"
+                                   id="flights"
+                                   class="form-control"
+                                   th:field="*{flights}"
+                                   th:classappend="${#fields.hasErrors('flights')} ? 'is-invalid' : ''"
+                                   placeholder="e.g. FL-NY-LON, FL-PAR-BER" />
+
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('flights')}" th:errors="*{flights}"></div>
+                            <div class="text-muted-soft mt-1" th:unless="${#fields.hasErrors('flights')}">
+                                Enter flight IDs separated by commas. At least one flight is required.
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <a href="/airplanes" class="btn btn-outline-light">
+                                Cancel
+                            </a>
+
+                            <button type="submit" class="btn btn-primary">
+                                <span th:text="${airplane.id == null || airplane.id == ''} ? 'Create Airplane' : 'Save Changes'">
+                                    Create Airplane
+                                </span>
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
             </div>
         </div>
     </div>

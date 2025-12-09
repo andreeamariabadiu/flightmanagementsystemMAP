@@ -16,6 +16,14 @@ public class AirportEmployeeService {
         this.airportEmployeeRepository = airportEmployeeRepository;
     }
 
+    private void validateBusinessRules(AirportEmployee employee, String currentId) {
+
+        // Rule 1: Unique ID Check (on Create only)
+        if (currentId == null && airportEmployeeRepository.existsById(employee.getId())) {
+            throw new IllegalArgumentException("Employee ID " + employee.getId() + " already exists.");
+        }
+    }
+
     public AirportEmployee save(AirportEmployee a) {
         return airportEmployeeRepository.save(a);
     }

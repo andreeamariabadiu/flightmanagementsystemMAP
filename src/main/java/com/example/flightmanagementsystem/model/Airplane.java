@@ -2,6 +2,9 @@ package com.example.flightmanagementsystem.model;
 
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.Positive;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,11 +15,14 @@ public class Airplane implements Identifiable{
 
     @Id
     @Column(length = 64)
+    @NotBlank(message = "ID can't be blank")
     private String id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
+    @Positive(message = "Airplane number must be > 0")
     private int airplaneNumber;
 
+    @NotEmpty(message = "Airplane must have at least one flight assigned")
     @ElementCollection
     @CollectionTable(
             name = "airplane_flights",
@@ -33,7 +39,7 @@ public class Airplane implements Identifiable{
 
     public Airplane() {}
 
-    // getterss and setters
+    // getters and setters
 
     @Override
     public String getId() {

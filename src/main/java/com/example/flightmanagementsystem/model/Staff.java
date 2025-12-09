@@ -1,15 +1,18 @@
 package com.example.flightmanagementsystem.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 @MappedSuperclass
 public abstract class Staff implements Identifiable {
 
     @Id
     @Column(length = 64)
+    @NotBlank(message = "ID can't be blank")
     private String id;
 
     @Column(nullable = false, length = 100)
+    @NotBlank(message = "Name can't be blank")
     private String name;
 
     public Staff() {}

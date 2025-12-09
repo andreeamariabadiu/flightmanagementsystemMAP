@@ -3,82 +3,110 @@ package com.example.flightmanagementsystem.controller;
 import com.example.flightmanagementsystem.model.AirlineEmployee;
 import com.example.flightmanagementsystem.model.Role;
 import com.example.flightmanagementsystem.service.AirlineEmployeeService;
+import jakarta.validation.Valid; // Ensure this import matches your validation dependency
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
-
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.List;
 
 @Controller
 @RequestMapping("/airline-employees")
 public class AirlineEmployeeController {
 
-    public final AirlineEmployeeService airlineEmployeeService;
-
-    private static final DateTimeFormatter FORM_FMT =
-            DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    private final AirlineEmployeeService airlineEmployeeService;
 
     public AirlineEmployeeController(AirlineEmployeeService airlineEmployeeService) {
         this.airlineEmployeeService = airlineEmployeeService;
     }
 
-    //list all airline employees
+    // 1. List - No changes needed
     @GetMapping
     public String listAirlineEmployees(Model model) {
         model.addAttribute("airlineEmployees", airlineEmployeeService.findAll());
         return "airlineemployees/index";
     }
 
-    // create new airline employee form
+    // 2. New Form
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("airlineEmployee", new AirlineEmployee());
+        model.addAttribute("roles", Role.values());
         return "airlineemployees/form";
     }
 
-    // Handle form submission and create an airline employee
+    // 3. Create - UPDATED
     @PostMapping
     public String createAirlineEmployee(
-            @RequestParam String id,
-            @RequestParam String name,
-            @RequestParam Role role,
-            @RequestParam List<String> assignments,
-            @RequestParam String licenseNumber,
-            @RequestParam String registrationDate
-
+            @Valid @ModelAttribute("airlineEmployee") AirlineEmployee airlineEmployee,
+            BindingResult bindingResult, // Must come immediately after the @Valid object
+            Model model
     ) {
-        LocalDate RegDate = LocalDate.parse(registrationDate, FORM_FMT);
+        // 1. Check for standard annotation errors (NotBlank, NotNull, etc.)
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("roles", Role.values()); // Re-send roles so dropdown works
+            return "airlineemployees/form"; // Return to form to show errors
+        }
 
-        AirlineEmployee ae = new AirlineEmployee(id, name, assignments, role, licenseNumber, RegDate);
-        airlineEmployeeService.save(ae);
+        // 2. Check for custom business rules (Unique License)
+        try {
+            airlineEmployeeService.save(airlineEmployee);
+        } catch (IllegalArgumentException e) {
+            // Add the service error to the binding result manually
+            bindingResult.rejectValue("licenseNumber", "error.user", e.getMessage());
+            model.addAttribute("roles", Role.values());
+            return "airlineemployees/form";
+        }
 
         return "redirect:/airline-employees";
     }
 
-    //delete airline employee
+    // 4. Edit Form - No changes needed
+    @GetMapping("/{id}/edit")
+    public String showEditForm(@PathVariable String id, Model model) {
+        AirlineEmployee emp = airlineEmployeeService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + id));
+        model.addAttribute("airlineEmployee", emp);
+        model.addAttribute("roles", Role.values());
+        return "airlineemployees/form";
+    }
+
+    // 5. Update - UPDATED
+    @PostMapping("/{id}")
+    public String updateAirlineEmployee(
+            @PathVariable String id,
+            @Valid @ModelAttribute("airlineEmployee") AirlineEmployee airlineEmployee,
+            BindingResult bindingResult,
+            Model model
+    ) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("roles", Role.values());
+            return "airlineemployees/form";
+        }
+
+        try {
+            airlineEmployeeService.updateEmployee(id, airlineEmployee);
+        } catch (IllegalArgumentException e) {
+            bindingResult.rejectValue("licenseNumber", "error.user", e.getMessage());
+            model.addAttribute("roles", Role.values());
+            return "airlineemployees/form";
+        }
+
+        return "redirect:/airline-employees";
+    }
+
+    // 6) Delete airline employee
     @PostMapping("/{id}/delete")
     public String deleteAirlineEmployee(@PathVariable String id) {
         airlineEmployeeService.delete(id);
         return "redirect:/airline-employees";
     }
 
-    //update airline employee form
-    @GetMapping("/{id}/edit")
-    public String showEditForm(@PathVariable String id, Model model) {
-        AirlineEmployee emp = airlineEmployeeService.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
-        model.addAttribute("airlineEmployee", emp);
-        return "airlineemployees/form";
-    }
-
-    //show details page
+    // 7) Show details page
     @GetMapping("/{id}/details")
     public String showDetails(@PathVariable String id, Model model) {
         AirlineEmployee emp = airlineEmployeeService.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
+                .orElseThrow(() -> new IllegalArgumentException("Invalid employee id: " + id));
+
         model.addAttribute("airlineEmployee", emp);
         return "airlineemployees/details";
     }

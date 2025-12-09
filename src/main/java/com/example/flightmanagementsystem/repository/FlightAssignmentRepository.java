@@ -6,4 +6,8 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface FlightAssignmentRepository extends JpaRepository<FlightAssignment, String> {
+
+    boolean existsByFlightIdAndStaffId(String flightId, String staffId);
+
+    boolean existsByFlightIdAndStaffIdAndIdNot(String flightId, String staffId, String id);
 }

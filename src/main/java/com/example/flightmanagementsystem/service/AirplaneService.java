@@ -17,7 +17,32 @@ public class AirplaneService {
         this.airplaneRepository = airplaneRepository;
     }
 
+    // --- BUSINESS LOGIC ---
+    private void validateBusinessRules(Airplane airplane, String currentId) {
+
+        // Rule 1: Unique ID (Only check on Create)
+        if (currentId == null && airplaneRepository.existsById(airplane.getId())) {
+            throw new IllegalArgumentException("Airplane ID " + airplane.getId() + " is already taken.");
+        }
+
+        // Rule 2: Unique Airplane Number
+        boolean numberTaken;
+        if (currentId == null) {
+            // New airplane
+            numberTaken = airplaneRepository.existsByAirplaneNumber(airplane.getAirplaneNumber());
+        } else {
+            // Editing existing airplane (ignore self)
+            numberTaken = airplaneRepository.existsByAirplaneNumberAndIdNot(airplane.getAirplaneNumber(), currentId);
+        }
+
+        if (numberTaken) {
+            throw new IllegalArgumentException("Airplane Number " + airplane.getAirplaneNumber() + " is already in use.");
+        }
+    }
+
+
     public Airplane save(Airplane a) {
+        validateBusinessRules(a, null);
         return airplaneRepository.save(a);
     }
 
@@ -37,7 +62,8 @@ public class AirplaneService {
         return airplaneRepository.findById(id);
     }
 
-    public void updateEmployee(String id, Airplane update) {
+    public void updateAirplane(String id, Airplane update) {
+        validateBusinessRules(update, id);
         update.setId(id);
         airplaneRepository.save(update);
     }

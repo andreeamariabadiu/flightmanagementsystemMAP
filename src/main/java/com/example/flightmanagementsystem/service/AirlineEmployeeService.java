@@ -17,8 +17,30 @@ public class AirlineEmployeeService {
         this.airlineEmployeeRepository = airlineEmployeeRepository;
     }
 
+    private void validateBusinessRules(AirlineEmployee employee, String currentId) {
+
+        //  Unique License check
+        boolean licenseUsed;
+        if (currentId == null) {
+            licenseUsed = airlineEmployeeRepository.existsByLicenseNumber(employee.getLicenseNumber());
+        } else {
+            licenseUsed = airlineEmployeeRepository.existsByLicenseNumberAndIdNot(employee.getLicenseNumber(), currentId);
+        }
+
+        if (licenseUsed) {
+            throw new IllegalArgumentException("This license number is already used by another employee.");
+        }
+    }
+
     public AirlineEmployee save(AirlineEmployee a) {
+        validateBusinessRules(a, null);
         return airlineEmployeeRepository.save(a);
+    }
+
+    public void updateEmployee(String id, AirlineEmployee update) {
+        validateBusinessRules(update, id);
+        update.setId(id);
+        airlineEmployeeRepository.save(update);
     }
 
     public boolean delete(String id) {

@@ -15,8 +15,40 @@ public class FlightAssignmentService {
         this.flightAssignmentRepository = flightAssignmentRepository;
     }
 
+    // --- BUSINESS LOGIC ---
+    private void validateBusinessRules(FlightAssignment assignment, String currentId) {
+
+        // Rule 1: Unique Assignment ID (Only on Create)
+        if (currentId == null && flightAssignmentRepository.existsById(assignment.getId())) {
+            throw new IllegalArgumentException("Assignment ID " + assignment.getId() + " already exists.");
+        }
+
+        // Rule 2: Prevent Duplicate Assignment
+        // (A staff member cannot be assigned to the same flight twice)
+        boolean exists;
+        if (currentId == null) {
+            exists = flightAssignmentRepository.existsByFlightIdAndStaffId(
+                    assignment.getFlightId(), assignment.getStaffId());
+        } else {
+            exists = flightAssignmentRepository.existsByFlightIdAndStaffIdAndIdNot(
+                    assignment.getFlightId(), assignment.getStaffId(), currentId);
+        }
+
+        if (exists) {
+            throw new IllegalArgumentException("Staff member " + assignment.getStaffId() +
+                    " is already assigned to Flight " + assignment.getFlightId());
+        }
+    }
+
     public FlightAssignment save(FlightAssignment fa) {
+        validateBusinessRules(fa, null);
         return flightAssignmentRepository.save(fa);
+    }
+
+    public void updateAssignment(String id, FlightAssignment update) {
+        validateBusinessRules(update, id);
+        update.setId(id);
+        flightAssignmentRepository.save(update);
     }
 
     public boolean delete(String id) {

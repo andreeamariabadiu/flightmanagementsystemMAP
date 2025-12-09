@@ -1,55 +1,58 @@
 package com.example.flightmanagementsystem.controller;
 
-import com.example.flightmanagementsystem.model.AirlineEmployee;
 import com.example.flightmanagementsystem.model.FlightAssignment;
 import com.example.flightmanagementsystem.service.FlightAssignmentService;
+import jakarta.validation.Valid; // Ensure you have this import
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 @Controller
 @RequestMapping("/flight-assignments")
 public class FlightAssignmentController {
-    public final FlightAssignmentService flightAssignmentService;
+
+    private final FlightAssignmentService flightAssignmentService;
 
     public FlightAssignmentController(FlightAssignmentService flightAssignmentService) {
         this.flightAssignmentService = flightAssignmentService;
     }
 
-    // list all flight assignments
+    // List all
     @GetMapping
     public String listFlightAssignments(Model model) {
         model.addAttribute("flightAssignments", flightAssignmentService.findAll());
         return "flightassignment/index";
     }
 
-    // show form to create new flight assignment
+    // Create Form
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("flightAssignment", new FlightAssignment());
         return "flightassignment/form";
     }
 
-    // handle form submission and create a flight assignment
+    // Handle Create (POST)
     @PostMapping
     public String createFlightAssignment(
-            @RequestParam String id,
-            @RequestParam String flightId,
-            @RequestParam String staffId
+            @Valid @ModelAttribute("flightAssignment") FlightAssignment flightAssignment,
+            BindingResult bindingResult
     ) {
-        FlightAssignment fa = new FlightAssignment(id, flightId, staffId);
-        flightAssignmentService.save(fa);
+        if (bindingResult.hasErrors()) {
+            return "flightassignment/form";
+        }
+
+        try {
+            flightAssignmentService.save(flightAssignment);
+        } catch (IllegalArgumentException e) {
+            bindingResult.reject("global.error", e.getMessage());
+            return "flightassignment/form";
+        }
+
         return "redirect:/flight-assignments";
     }
 
-    //delete flight assignment
-    @PostMapping("/{id}/delete")
-    public String deleteFlightAssignment(@PathVariable String id) {
-        flightAssignmentService.delete(id);
-        return "redirect:/flight-assignments";
-    }
-
-    //update airline employee form
+    // Edit Form
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable String id, Model model) {
         FlightAssignment fa = flightAssignmentService.findById(id)
@@ -58,7 +61,35 @@ public class FlightAssignmentController {
         return "flightassignment/form";
     }
 
-    //show details page
+    // Handle Update (POST)
+    @PostMapping("/{id}")
+    public String updateFlightAssignment(
+            @PathVariable String id,
+            @Valid @ModelAttribute("flightAssignment") FlightAssignment flightAssignment,
+            BindingResult bindingResult
+    ) {
+        if (bindingResult.hasErrors()) {
+            return "flightassignment/form";
+        }
+
+        try {
+            flightAssignmentService.updateAssignment(id, flightAssignment);
+        } catch (IllegalArgumentException e) {
+            bindingResult.reject("global.error", e.getMessage());
+            return "flightassignment/form";
+        }
+
+        return "redirect:/flight-assignments";
+    }
+
+    // Delete
+    @PostMapping("/{id}/delete")
+    public String deleteFlightAssignment(@PathVariable String id) {
+        flightAssignmentService.delete(id);
+        return "redirect:/flight-assignments";
+    }
+
+    // Details
     @GetMapping("/{id}/details")
     public String showDetails(@PathVariable String id, Model model) {
         FlightAssignment fa = flightAssignmentService.findById(id)

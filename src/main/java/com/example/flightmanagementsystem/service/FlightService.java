@@ -15,8 +15,36 @@ public class FlightService {
         this.flightRepository = flightRepository;
     }
 
+    // --- BUSINESS LOGIC ---
+    private void validateBusinessRules(Flight flight, String currentId) {
+
+        // Rule 1: Unique ID (Only on Create)
+        if (currentId == null && flightRepository.existsById(flight.getId())) {
+            throw new IllegalArgumentException("Flight ID " + flight.getId() + " is already in use.");
+        }
+
+        // Rule 2: Chronology Check
+        // The plane cannot arrive before it leaves.
+        if (flight.getDepartureTime() != null && flight.getArrivalTime() != null) {
+            if (flight.getArrivalTime().isBefore(flight.getDepartureTime())) {
+                throw new IllegalArgumentException("Arrival time cannot be before Departure time.");
+            }
+
+            if (flight.getArrivalTime().isEqual(flight.getDepartureTime())) {
+                throw new IllegalArgumentException("Arrival and Departure cannot be the exact same time.");
+            }
+        }
+    }
+
     public Flight save(Flight f) {
+        validateBusinessRules(f, null);
         return flightRepository.save(f);
+    }
+
+    public void updateFlight(String id, Flight update) {
+        validateBusinessRules(update, id);
+        update.setId(id);
+        flightRepository.save(update);
     }
 
     public boolean delete(String id) {
@@ -35,8 +63,4 @@ public class FlightService {
         return flightRepository.findById(id);
     }
 
-    public void updateEmployee(String id, Flight update) {
-        update.setId(id);
-        flightRepository.save(update);
-    }
 }

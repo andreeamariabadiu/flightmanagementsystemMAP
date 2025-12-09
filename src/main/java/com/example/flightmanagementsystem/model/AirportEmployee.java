@@ -1,5 +1,6 @@
 package com.example.flightmanagementsystem.model;
 
+import jakarta.validation.constraints.*;
 
 import jakarta.persistence.*;
 
@@ -7,10 +8,12 @@ import jakarta.persistence.*;
 @Table(name = "airport_employees")
 public class AirportEmployee extends Staff implements Identifiable{
 
+    @NotNull(message = "Designation must be selected")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Designation designation;
 
+    @NotNull(message = "Department must be selected")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Department department;

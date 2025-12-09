@@ -1,10 +1,149 @@
 <!DOCTYPE html>
-<html lang="en">
+<html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Airplane Details</title>
+
+    <link
+            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
+            rel="stylesheet">
+
+    <style>
+        body {
+            background: linear-gradient(135deg, #020617, #0f172a);
+            min-height: 100vh;
+            color: #e5e7eb;
+        }
+
+        .page-wrapper {
+            padding-top: 4rem;
+            padding-bottom: 4rem;
+        }
+
+        .card-main {
+            background-color: #020617;
+            border-radius: 18px;
+            border: 1px solid rgba(148, 163, 184, 0.35);
+            box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8);
+        }
+
+        .label-muted {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: .09em;
+            color: #9ca3af;
+        }
+
+        .value-text {
+            font-size: 1rem;
+            color: #e5e7eb;
+        }
+
+        .status-pill {
+            padding: 0.2rem 0.75rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+            background: rgba(56, 189, 248, .18);
+            color: #67e8f9;
+        }
+    </style>
 </head>
 <body>
 
+<nav class="navbar navbar-dark bg-transparent px-4 pt-3">
+    <div class="d-flex align-items-center gap-3">
+        <a href="/" class="btn btn-outline-light btn-sm rounded-pill px-3">
+            ⬅ Dashboard
+        </a>
+        <a href="/airplanes" class="btn btn-link text-light">
+            ← Back to Airplanes
+        </a>
+    </div>
+</nav>
+
+<div class="container page-wrapper" th:object="${airplane}">
+    <div class="row justify-content-center">
+        <div class="col-lg-7 col-xl-6">
+            <div class="card card-main">
+
+                <div class="card-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-start">
+                    <div>
+                        <p class="label-muted mb-1">Airplane Details</p>
+                        <h3 class="mb-0 text-light" th:text="'Airplane #' + *{airplaneNumber}">
+                            Airplane #101
+                        </h3>
+                        <span class="badge bg-secondary mt-2"
+                              th:text="'ID: ' + *{id}">
+                            ID: AP-123
+                        </span>
+                    </div>
+
+                    <div class="text-end">
+                        <span class="label-muted d-block mb-1">Status</span>
+                        <span class="status-pill"
+                              th:if="*{flights != null and !flights.isEmpty()}"
+                              th:text="${#lists.size(airplane.flights)} + ' Active Flights'">
+                        </span>
+                        <span class="status-pill"
+                              style="background: rgba(148, 163, 184, 0.2); color: #cbd5e1;"
+                              th:if="*{flights == null or flights.isEmpty()}">
+                            Idle
+                        </span>
+                    </div>
+                </div>
+
+                <div class="card-body px-4 pt-4 pb-4">
+
+                    <div class="mb-4">
+                        <span class="label-muted d-block mb-2">Assigned Flight IDs</span>
+
+                        <div th:if="*{flights != null and !flights.isEmpty()}">
+                            <ul class="list-group list-group-flush bg-transparent">
+                                <li class="list-group-item bg-transparent text-light border-secondary ps-0"
+                                    th:each="flightId : *{flights}">
+                                    ✈ <span th:text="${flightId}">FL-101</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <span class="value-text text-muted fst-italic"
+                              th:if="*{flights == null or flights.isEmpty()}">
+                            No active flights currently assigned to this aircraft.
+                        </span>
+                    </div>
+
+                    <hr class="border-secondary mb-4">
+
+                    <div class="d-flex justify-content-between">
+                        <a href="/airplanes" class="btn btn-outline-light">
+                            Back
+                        </a>
+
+                        <div>
+                            <a th:href="@{'/airplanes/' + *{id} + '/edit'}"
+                               class="btn btn-outline-primary me-2">
+                                Edit
+                            </a>
+                            <form th:action="@{'/airplanes/' + *{id} + '/delete'}"
+                                  method="post"
+                                  style="display:inline;">
+                                <button type="submit"
+                                        class="btn btn-outline-danger"
+                                        onclick="return confirm('Are you sure you want to delete this airplane?');">
+                                    Delete
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

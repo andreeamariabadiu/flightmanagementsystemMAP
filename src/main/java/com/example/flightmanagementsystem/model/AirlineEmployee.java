@@ -1,6 +1,9 @@
 package com.example.flightmanagementsystem.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
+import org.springframework.format.annotation.DateTimeFormat;
+
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -10,6 +13,7 @@ import java.util.List;
 @Table(name = "airline_employees")
 public class AirlineEmployee extends Staff implements Identifiable {
 
+    @NotEmpty(message = "Employee must have at least one assignment")
     @ElementCollection
     @CollectionTable(
             name = "employee_assignments",
@@ -20,12 +24,17 @@ public class AirlineEmployee extends Staff implements Identifiable {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
+    @NotNull(message = "Role must be selected")
     private Role role;
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true, length = 50)
+    @NotBlank(message = "License number can't be blank")
     private String licenseNumber;
 
     @Column(nullable = false)
+    @NotNull(message = "Registration date is required")
+    @PastOrPresent(message = "Work registration date can't be in the future")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate registrationDate;
 
     public AirlineEmployee() {}

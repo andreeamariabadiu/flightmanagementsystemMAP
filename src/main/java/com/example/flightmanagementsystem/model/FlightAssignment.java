@@ -1,18 +1,22 @@
 package com.example.flightmanagementsystem.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.*;
 
 @Entity
 @Table(name = "flight_assignments")
 public class FlightAssignment implements Identifiable{
 
+    @NotBlank(message = "ID can't be blank")
     @Id
     @Column(length = 64)
     public String id;
 
+    @NotBlank(message = "Flight ID can't be blank")
     @Column(nullable = false)
     public String flightId;
 
+    @NotBlank(message = "Staff ID can't be blank")
     @Column(nullable = false)
     public String staffId;
 

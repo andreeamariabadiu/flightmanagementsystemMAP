@@ -1,6 +1,11 @@
 package com.example.flightmanagementsystem.model;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.PastOrPresent;
+import org.springframework.format.annotation.DateTimeFormat;
 
 
 import java.time.LocalDate;
@@ -12,16 +17,20 @@ import java.util.List;
 @Table(name = "flights")
 public class Flight implements Identifiable{
 
+    @NotBlank(message = "ID can't be blank")
     @Id
     @Column(length = 64)
     private String id;
 
+    @NotBlank(message = "Flight name can't be blank")
     @Column(nullable = false)
     private String flightName;
 
+    @NotBlank(message = "NoticeBoard ID can't be blank")
     @Column(nullable = false)
     private String NoticeBoardId;
 
+    @NotBlank(message = "Airplane ID can't be blank")
     @Column(nullable = false)
     private String AirplaneId;
 
@@ -41,12 +50,17 @@ public class Flight implements Identifiable{
     @Column(name = "assignment_id")
     private List<String> flightAssignments = new ArrayList<>(); // flight assignment IDs
 
+    @NotNull(message = "Departure time is required")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     @Column(nullable = false)
     private LocalDateTime departureTime;
 
+    @NotNull(message = "Arrival time is required")
+    @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm")
     @Column(nullable = false)
     private LocalDateTime arrivalTime;
 
+    @NotNull(message = "Status must be selected")
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private Status status;
