@@ -5,7 +5,7 @@ import com.example.flightmanagementsystem.model.Luggage.Status;
 import com.example.flightmanagementsystem.service.LuggageService;
 import com.example.flightmanagementsystem.service.TicketService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Sort; // IMPORT
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -25,10 +25,14 @@ public class LuggageController {
         this.ticketService = ticketService;
     }
 
-    // --- METODA MODIFICATĂ PENTRU SORTARE ---
     @GetMapping
     public String listLuggages(
             Model model,
+            // Parametrii de Filtrare
+            @RequestParam(required = false) String id,
+            @RequestParam(required = false) String ticketId,
+            @RequestParam(required = false) Status status,
+            // Parametrii de Sortare
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
@@ -36,14 +40,23 @@ public class LuggageController {
                 Sort.by(sortBy).ascending() :
                 Sort.by(sortBy).descending();
 
-        List<Luggage> luggages = luggageService.findAll(sort);
+        // Apel Service cu Filtre
+        List<Luggage> luggages = luggageService.searchLuggages(id, ticketId, status, sort);
 
         model.addAttribute("luggages", luggages);
 
-        // Parametrii pentru View
+        // Retrimitere filtre
+        model.addAttribute("filterId", id);
+        model.addAttribute("filterTicket", ticketId);
+        model.addAttribute("filterStatus", status);
+
+        // Retrimitere sortare
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");
+
+        // Listă statusuri pentru dropdown
+        model.addAttribute("allStatuses", Status.values());
 
         return "luggage/index";
     }

@@ -4,6 +4,11 @@ import com.example.flightmanagementsystem.model.AirlineEmployee;
 import com.example.flightmanagementsystem.repository.AirlineEmployeeRepository;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.data.jpa.domain.Specification; // IMPORT
+import jakarta.persistence.criteria.Predicate; // IMPORT
+import com.example.flightmanagementsystem.model.Role; // IMPORT
+import java.time.LocalDate; // IMPORT
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,6 +52,47 @@ public class AirlineEmployeeService {
             return true;
         }
         return false;
+    }
+
+    public List<AirlineEmployee> searchEmployees(
+            String name,
+            Role role,
+            String licenseNumber,
+            LocalDate minDate,
+            LocalDate maxDate,
+            Sort sort) {
+
+        Specification<AirlineEmployee> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // 1. Filtru după Nume (Case Insensitive, Parțial)
+            if (name != null && !name.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("name")), "%" + name.toLowerCase() + "%"));
+            }
+
+            // 2. Filtru după Rol (Exact)
+            if (role != null) {
+                predicates.add(cb.equal(root.get("role"), role));
+            }
+
+            // 3. Filtru după Licență (Case Insensitive, Parțial)
+            if (licenseNumber != null && !licenseNumber.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("licenseNumber")), "%" + licenseNumber.toLowerCase() + "%"));
+            }
+
+            // 4. Filtru Interval Dată (De la... Până la...)
+            if (minDate != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("registrationDate"), minDate));
+            }
+            if (maxDate != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("registrationDate"), maxDate));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // Apelăm repository-ul cu Specificația ȘI Sortarea
+        return repository.findAll(spec, sort);
     }
 
     public Optional<AirlineEmployee> findById(String id) { return repository.findById(id); }

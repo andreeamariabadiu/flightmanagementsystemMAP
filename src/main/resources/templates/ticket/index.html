@@ -2,104 +2,356 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
-    <title>Tickets | Flight Management</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        body { background: linear-gradient(135deg, #020617, #0f172a); min-height: 100vh; color: #e5e7eb; }
-        .page-wrapper { padding-top: 4rem; padding-bottom: 4rem; }
-        .card-main { background-color: #020617; border-radius: 18px; border: 1px solid rgba(148, 163, 184, 0.35); }
-        .btn-primary { border-radius: 999px; }
-        .table thead { background: rgba(15, 23, 42, 0.9); }
-        .seat-pill { background: rgba(56, 189, 248, .15); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, .3); padding: 0.2rem 0.6rem; border-radius: 6px; font-weight: 600; }
-        .price-text { color: #86efac; font-weight: 600; font-family: monospace; font-size: 1rem; }
+    <title>Tickets | Flight Management System</title>
 
-        /* Sort Styles */
-        .sortable { color: #cbd5e1; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
-        .sortable:hover { color: #fff; }
-        .sort-icon { width: 0; height: 0; border-style: solid; opacity: 0.7; }
-        .sort-up { border-width: 0 4px 6px 4px; border-color: transparent transparent #60a5fa transparent; }
-        .sort-down { border-width: 6px 4px 0 4px; border-color: #60a5fa transparent transparent transparent; }
-        .sorted-text { color: #60a5fa; font-weight: 700; }
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+
+    <style>
+        /* --- TEMPLATE DARK MODE --- */
+        :root {
+            --bg-body: #0b0f19;
+            --bg-card: #151e32;
+            --bg-input: #0f172a;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #22d3ee;
+            --border-color: rgba(255, 255, 255, 0.15);
+        }
+
+        body {
+            background-color: var(--bg-body);
+            background-image: linear-gradient(to bottom right, #0b0f19, #111827);
+            min-height: 100vh;
+            color: var(--text-muted);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
+
+        .page-wrapper { padding-top: 2rem; padding-bottom: 4rem; }
+
+        /* --- CARD STYLE --- */
+        .card-main {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .page-title { color: var(--text-main); font-weight: 700; letter-spacing: -0.5px; }
+
+        /* --- FILTRARE --- */
+        .filter-section {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .filter-label {
+            color: #cbd5e1;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control, .form-select, .input-group-text {
+            background-color: var(--bg-input);
+            border: 1px solid #334155;
+            color: var(--text-main);
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: var(--bg-input);
+            border-color: var(--accent-blue);
+            color: var(--text-main);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        .form-control::placeholder { color: #64748b; }
+        .input-group-text { color: var(--text-muted); }
+
+        /* --- TABEL --- */
+        .table-custom {
+            margin-bottom: 0;
+            --bs-table-bg: transparent;
+            --bs-table-border-color: var(--border-color);
+        }
+
+        .table-custom thead th {
+            background-color: rgba(20, 30, 50, 0.9);
+            color: #cbd5e1;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            padding: 1rem;
+            border-bottom: 2px solid #334155;
+            letter-spacing: 0.5px;
+        }
+
+        .table-custom tbody td {
+            vertical-align: middle;
+            padding: 1rem;
+            color: var(--text-main);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(59, 130, 246, 0.08);
+        }
+
+        /* --- ELEMENTE SPECIFICE --- */
+        .ticket-id {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+
+        .flight-name {
+            color: var(--accent-cyan);
+            font-weight: 600;
+        }
+
+        .pass-name {
+            color: #e2e8f0;
+            font-weight: 500;
+        }
+
+        .seat-badge {
+            background: rgba(255, 255, 255, 0.1);
+            color: #94a3b8;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 0.3em 0.8em;
+            border-radius: 4px;
+            font-family: monospace;
+            font-weight: 600;
+        }
+
+        /* Sortare */
+        .sort-link {
+            text-decoration: none;
+            color: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .sort-link.active { color: var(--accent-blue); }
+        .sort-link:hover { color: #fff; }
+
+        /* --- BUTTONS & DROPDOWNS --- */
+        .btn-new {
+            background-color: var(--accent-blue);
+            border: none; color: white; font-weight: 600; padding: 0.6rem 1.5rem;
+        }
+        .btn-new:hover { background-color: #2563eb; }
+
+        .btn-filter {
+            background-color: var(--accent-blue); border: none; color: white; font-weight: 600;
+        }
+        .btn-filter:hover { background-color: #2563eb; }
+
+        .btn-actions {
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            background: transparent;
+            font-weight: 500;
+            padding: 0.4rem 1rem;
+        }
+        .btn-actions:hover, .btn-actions.show {
+            background-color: #334155;
+            color: white;
+            border-color: #64748b;
+        }
+
+        .dropdown-menu-dark {
+            background-color: #1e293b;
+            border: 1px solid #475569;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .dropdown-item { color: #e2e8f0; padding: 0.5rem 1rem;}
+        .dropdown-item:hover { background-color: #334155; color: white; }
+        .dropdown-divider { border-top-color: #475569; }
     </style>
 </head>
 <body>
-<nav class="navbar navbar-dark bg-transparent px-4 pt-3">
-    <a class="navbar-brand" href="/">✈ Flight Management System</a>
-    <div class="d-flex gap-2">
-        <a href="/" class="btn btn-outline-light btn-sm">← Dashboard</a>
+
+<nav class="navbar navbar-dark bg-transparent px-4 pt-4 mb-3">
+    <div class="d-flex align-items-center gap-3">
+        <a href="/" class="btn btn-outline-secondary btn-sm rounded-pill px-3 text-light border-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Dashboard
+        </a>
     </div>
 </nav>
+
 <div class="container page-wrapper">
     <div class="row justify-content-center">
-        <div class="col-lg-12">
+        <div class="col-12 col-xxl-10">
+
             <div class="card card-main">
-                <div class="card-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-center">
-                    <h3 class="mb-1 text-light">Tickets</h3>
-                    <a href="/tickets/new" class="btn btn-primary btn-sm">+ Issue Ticket</a>
+
+                <div class="card-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-end bg-transparent">
+                    <div>
+                        <h3 class="page-title mb-1">
+                            <i class="bi bi-ticket-perforated-fill me-2 text-primary opacity-75"></i>Tickets
+                        </h3>
+                        <p class="text-muted mb-3">Manage issued tickets and reservations.</p>
+                    </div>
+                    <div class="mb-3">
+                        <a href="/tickets/new" class="btn btn-new rounded-pill">
+                            <i class="bi bi-plus-lg me-1"></i> New Ticket
+                        </a>
+                    </div>
                 </div>
-                <div class="card-body px-4 pb-4 pt-3">
+
+                <div class="filter-section mt-2">
+                    <form method="get" action="/tickets">
+                        <input type="hidden" name="sortBy" th:value="${sortBy}" />
+                        <input type="hidden" name="sortDir" th:value="${sortDir}" />
+
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <div class="filter-label">Ticket ID</div>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" name="id" class="form-control border-start-0"
+                                           th:value="${filterId}" placeholder="e.g. TKT-101">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="filter-label">Search Flight</div>
+                                <input type="text" name="flightName" class="form-control"
+                                       th:value="${filterFlight}" placeholder="e.g. Paris">
+                            </div>
+
+                            <div class="col-md-3">
+                                <div class="filter-label">Search Passenger</div>
+                                <input type="text" name="passengerName" class="form-control"
+                                       th:value="${filterPassenger}" placeholder="e.g. Smith">
+                            </div>
+
+                            <div class="col-md-3 d-flex align-items-end gap-2">
+                                <button type="submit" class="btn btn-filter w-100">
+                                    <i class="bi bi-funnel-fill me-1"></i> Filter
+                                </button>
+                                <a href="/tickets" class="btn btn-outline-secondary px-3" title="Reset Filters">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(tickets)}" class="text-center text-muted py-5 my-4">
+                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
+                        <p class="mb-1">No tickets found matching your criteria.</p>
+                        <small>Try adjusting filters or issue a new ticket.</small>
+                        <div class="mt-3">
+                            <a href="/tickets" class="btn btn-sm btn-outline-light">Clear Filters</a>
+                        </div>
+                    </div>
+
                     <div th:if="${!#lists.isEmpty(tickets)}" class="table-responsive">
-                        <table class="table table-dark table-borderless align-middle mb-0">
+                        <table class="table table-custom table-hover align-middle">
                             <thead>
                             <tr>
-                                <th scope="col" class="ps-3">
-                                    <a th:href="@{/tickets(sortBy='seatNumber', sortDir=${sortBy == 'seatNumber' ? reverseSortDir : 'asc'})}"
-                                       class="sortable" th:classappend="${sortBy == 'seatNumber' ? 'sorted-text' : ''}">
-                                        Seat / ID
-                                        <span th:if="${sortBy == 'seatNumber'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
+                                <th scope="col" style="width: 20%;">
+                                    <a th:href="@{/tickets(
+                                        sortBy='id', sortDir=${sortBy == 'id' ? reverseSortDir : 'asc'},
+                                        id=${filterId}, flightName=${filterFlight}, passengerName=${filterPassenger}
+                                    )}" class="sort-link" th:classappend="${sortBy == 'id' ? 'active' : ''}">
+                                        Ticket ID
+                                        <i class="bi sort-icon"
+                                           th:classappend="${sortBy == 'id' ? (sortDir == 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-down-alt') : 'bi-arrow-down-up opacity-25'}"></i>
                                     </a>
                                 </th>
 
-                                <th scope="col">
-                                    <a th:href="@{/tickets(sortBy='flight.flightName', sortDir=${sortBy == 'flight.flightName' ? reverseSortDir : 'asc'})}"
-                                       class="sortable" th:classappend="${sortBy == 'flight.flightName' ? 'sorted-text' : ''}">
-                                        Flight Info
-                                        <span th:if="${sortBy == 'flight.flightName'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
+                                <th scope="col" style="width: 25%;">
+                                    <a th:href="@{/tickets(
+                                        sortBy='flight.flightName', sortDir=${sortBy == 'flight.flightName' ? reverseSortDir : 'asc'},
+                                        id=${filterId}, flightName=${filterFlight}, passengerName=${filterPassenger}
+                                    )}" class="sort-link" th:classappend="${sortBy == 'flight.flightName' ? 'active' : ''}">
+                                        Flight
+                                        <i class="bi sort-icon"
+                                           th:classappend="${sortBy == 'flight.flightName' ? (sortDir == 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-down-alt') : 'bi-arrow-down-up opacity-25'}"></i>
                                     </a>
                                 </th>
 
-                                <th scope="col">
-                                    <a th:href="@{/tickets(sortBy='passenger.name', sortDir=${sortBy == 'passenger.name' ? reverseSortDir : 'asc'})}"
-                                       class="sortable" th:classappend="${sortBy == 'passenger.name' ? 'sorted-text' : ''}">
+                                <th scope="col" style="width: 25%;">
+                                    <a th:href="@{/tickets(
+                                        sortBy='passenger.name', sortDir=${sortBy == 'passenger.name' ? reverseSortDir : 'asc'},
+                                        id=${filterId}, flightName=${filterFlight}, passengerName=${filterPassenger}
+                                    )}" class="sort-link" th:classappend="${sortBy == 'passenger.name' ? 'active' : ''}">
                                         Passenger
-                                        <span th:if="${sortBy == 'passenger.name'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
+                                        <i class="bi sort-icon"
+                                           th:classappend="${sortBy == 'passenger.name' ? (sortDir == 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-down-alt') : 'bi-arrow-down-up opacity-25'}"></i>
                                     </a>
                                 </th>
 
-                                <th scope="col">
-                                    <a th:href="@{/tickets(sortBy='price', sortDir=${sortBy == 'price' ? reverseSortDir : 'asc'})}"
-                                       class="sortable" th:classappend="${sortBy == 'price' ? 'sorted-text' : ''}">
-                                        Price
-                                        <span th:if="${sortBy == 'price'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
+                                <th scope="col" style="width: 15%;">
+                                    <a th:href="@{/tickets(
+                                        sortBy='seatNumber', sortDir=${sortBy == 'seatNumber' ? reverseSortDir : 'asc'},
+                                        id=${filterId}, flightName=${filterFlight}, passengerName=${filterPassenger}
+                                    )}" class="sort-link" th:classappend="${sortBy == 'seatNumber' ? 'active' : ''}">
+                                        Seat
+                                        <i class="bi sort-icon"
+                                           th:classappend="${sortBy == 'seatNumber' ? (sortDir == 'asc' ? 'bi-sort-numeric-down' : 'bi-sort-numeric-down-alt') : 'bi-arrow-down-up opacity-25'}"></i>
                                     </a>
                                 </th>
 
-                                <th scope="col" class="text-end pe-3">Actions</th>
+                                <th scope="col" class="text-end pe-4">Actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:each="t : ${tickets}">
-                                <td class="ps-3">
-                                    <div class="d-flex flex-column">
-                                        <div class="mb-1"><span class="seat-pill" th:text="${t.seatNumber}"></span></div>
-                                        <span class="text-muted small" th:text="'ID: ' + ${t.id}"></span>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-dark border border-secondary d-flex align-items-center justify-content-center text-light me-3"
+                                             style="width: 38px; height: 38px;">
+                                            <i class="bi bi-qr-code small"></i>
+                                        </div>
+                                        <span class="ticket-id" th:text="${t.id}"></span>
                                     </div>
                                 </td>
                                 <td>
-                                    <span class="text-info fw-bold">✈ <span th:text="${t.flight.flightName}"></span></span>
-                                    <div class="small text-muted" th:text="${#temporals.format(t.flight.departureTime, 'MMM dd, HH:mm')}"></div>
+                                    <div>
+                                        <div class="flight-name" th:text="${t.flight.flightName}"></div>
+                                        <small class="text-muted" th:text="'Dep: ' + ${#temporals.format(t.flight.departureTime, 'HH:mm')}"></small>
+                                    </div>
                                 </td>
                                 <td>
-                                    <span class="text-light">👤 <span th:text="${t.passenger.name}"></span></span>
+                                    <div class="pass-name" th:text="${t.passenger.name}"></div>
                                 </td>
-                                <td><span class="price-text" th:text="'$' + ${t.price}"></span></td>
-                                <td class="text-end pe-3">
-                                    <div class="btn-group btn-group-sm">
-                                        <a th:href="@{'/tickets/' + ${t.id} + '/details'}" class="btn btn-outline-light">Details</a>
-                                        <a th:href="@{'/tickets/' + ${t.id} + '/edit'}" class="btn btn-outline-primary">Edit</a>
-                                        <form th:action="@{'/tickets/' + ${t.id} + '/delete'}" method="post" style="display:contents;">
-                                            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Delete?');">Delete</button>
-                                        </form>
+                                <td>
+                                    <span class="seat-badge" th:text="${t.seatNumber}"></span>
+                                </td>
+
+                                <td class="text-end pe-4">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-actions dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Actions
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg">
+                                            <li>
+                                                <a class="dropdown-item" th:href="@{'/tickets/' + ${t.id} + '/details'}">
+                                                    <i class="bi bi-eye me-2 text-info opacity-75"></i> View Details
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" th:href="@{'/tickets/' + ${t.id} + '/edit'}">
+                                                    <i class="bi bi-pencil me-2 text-warning opacity-75"></i> Edit Ticket
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider opacity-25"></li>
+                                            <li>
+                                                <form th:action="@{'/tickets/' + ${t.id} + '/delete'}" method="post" style="display:inline;">
+                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Delete this ticket?');">
+                                                        <i class="bi bi-trash me-2"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
                                     </div>
                                 </td>
                             </tr>
@@ -108,9 +360,15 @@
                     </div>
                 </div>
             </div>
+
+            <div class="text-center mt-5 text-muted small opacity-50">
+                Flight Management System &copy; 2024
+            </div>
+
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

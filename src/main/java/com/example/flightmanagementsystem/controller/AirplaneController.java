@@ -24,17 +24,33 @@ public class AirplaneController {
     @GetMapping
     public String listAirplanes(
             Model model,
+            // Parametrii de Filtrare Standard
+            @RequestParam(required = false) String id,
+            @RequestParam(required = false) Integer airplaneNumber,
+            // Parametrii de Filtrare Noi (Zboruri)
+            @RequestParam(required = false) Integer minFlights,
+            @RequestParam(required = false) Integer maxFlights,
+            // Parametrii de Sortare
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
+        // 1. Configurare Sortare
         Sort sort = sortDir.equalsIgnoreCase("asc") ?
                 Sort.by(sortBy).ascending() :
                 Sort.by(sortBy).descending();
 
-        List<Airplane> airplanes = airplaneService.findAll(sort);
+        // 2. Apelare Service cu toate filtrele
+        List<Airplane> airplanes = airplaneService.searchAirplanes(id, airplaneNumber, minFlights, maxFlights, sort);
 
         model.addAttribute("airplanes", airplanes);
 
+        // 3. Retrimitem filtrele în pagină
+        model.addAttribute("filterId", id);
+        model.addAttribute("filterNumber", airplaneNumber);
+        model.addAttribute("filterMinFlights", minFlights);
+        model.addAttribute("filterMaxFlights", maxFlights);
+
+        // 4. Retrimitem sortarea în pagină
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");
@@ -62,7 +78,8 @@ public class AirplaneController {
 
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable String id, Model model) {
-        Airplane a = airplaneService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid ID"));
+        Airplane a = airplaneService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ID"));
         model.addAttribute("airplane", a);
         return "airplane/form";
     }
@@ -87,7 +104,8 @@ public class AirplaneController {
 
     @GetMapping("/{id}/details")
     public String showDetails(@PathVariable String id, Model model) {
-        Airplane a = airplaneService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid ID"));
+        Airplane a = airplaneService.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid ID"));
         model.addAttribute("airplane", a);
         return "airplane/details";
     }

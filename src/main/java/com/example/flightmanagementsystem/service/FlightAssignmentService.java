@@ -6,9 +6,12 @@ import com.example.flightmanagementsystem.model.FlightAssignment;
 import com.example.flightmanagementsystem.repository.AirlineEmployeeRepository;
 import com.example.flightmanagementsystem.repository.FlightAssignmentRepository;
 import com.example.flightmanagementsystem.repository.FlightRepository;
-import org.springframework.data.domain.Sort; // IMPORT NOU
+import jakarta.persistence.criteria.Predicate; // IMPORT
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification; // IMPORT
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,15 +76,44 @@ public class FlightAssignmentService {
         repo.save(fa);
     }
 
-    // CRUD
     public List<FlightAssignment> findAll() { return repo.findAll(); }
     public Optional<FlightAssignment> findById(String id) { return repo.findById(id); }
     public void delete(String id) {
         if(repo.existsById(id)) repo.deleteById(id);
     }
 
-    // METODA NOUĂ PENTRU SORTARE
+    // --- METODA DE CĂUTARE + FILTRARE + SORTARE ---
+    public List<FlightAssignment> searchAssignments(
+            String assignmentId,
+            String flightName,
+            String employeeName,
+            Sort sort
+    ) {
+        Specification<FlightAssignment> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // 1. Filtru ID Assignment
+            if (assignmentId != null && !assignmentId.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("id")), "%" + assignmentId.toLowerCase() + "%"));
+            }
+
+            // 2. Filtru Nume Zbor (Navigare prin relația 'flight')
+            if (flightName != null && !flightName.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("flight").get("flightName")), "%" + flightName.toLowerCase() + "%"));
+            }
+
+            // 3. Filtru Nume Angajat (Navigare prin relația 'employee')
+            if (employeeName != null && !employeeName.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("employee").get("name")), "%" + employeeName.toLowerCase() + "%"));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return repo.findAll(spec, sort);
+    }
+
     public List<FlightAssignment> findAll(Sort sort) {
-        return repo.findAll(sort);
+        return searchAssignments(null, null, null, sort);
     }
 }

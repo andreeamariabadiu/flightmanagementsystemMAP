@@ -4,9 +4,12 @@ import com.example.flightmanagementsystem.model.Luggage;
 import com.example.flightmanagementsystem.model.Ticket;
 import com.example.flightmanagementsystem.repository.LuggageRepository;
 import com.example.flightmanagementsystem.repository.TicketRepository;
-import org.springframework.data.domain.Sort; // IMPORT
+import jakarta.persistence.criteria.Predicate; // IMPORT
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification; // IMPORT
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -30,9 +33,7 @@ public class LuggageService {
     public Luggage createLuggage(Luggage luggage, String ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Ticket ID: " + ticketId));
-
         luggage.setTicket(ticket);
-
         validateRules(luggage, null);
         return luggageRepository.save(luggage);
     }
@@ -40,10 +41,8 @@ public class LuggageService {
     public void updateLuggage(String id, Luggage updated, String ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Ticket ID"));
-
         updated.setId(id);
         updated.setTicket(ticket);
-
         validateRules(updated, id);
         luggageRepository.save(updated);
     }
@@ -58,13 +57,41 @@ public class LuggageService {
 
     public Optional<Luggage> findById(String id) { return luggageRepository.findById(id); }
 
-    // --- METODE PENTRU SORTARE ---
-
-    // 1. Folosită de DataInitializer
     public List<Luggage> findAll() { return luggageRepository.findAll(); }
 
-    // 2. Folosită de Controller pentru Sortare
+    // --- METODA COMPLEXĂ: CĂUTARE + FILTRARE + SORTARE ---
+    public List<Luggage> searchLuggages(
+            String id,
+            String ticketId,
+            Luggage.Status status,
+            Sort sort
+    ) {
+        Specification<Luggage> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // 1. Filtru ID Bagaj (Parțial)
+            if (id != null && !id.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("id")), "%" + id.toLowerCase() + "%"));
+            }
+
+            // 2. Filtru ID Ticket (Navigare prin relația 'ticket')
+            if (ticketId != null && !ticketId.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("ticket").get("id")), "%" + ticketId.toLowerCase() + "%"));
+            }
+
+            // 3. Filtru Status (Exact)
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return luggageRepository.findAll(spec, sort);
+    }
+
+    // Compatibilitate
     public List<Luggage> findAll(Sort sort) {
-        return luggageRepository.findAll(sort);
+        return searchLuggages(null, null, null, sort);
     }
 }

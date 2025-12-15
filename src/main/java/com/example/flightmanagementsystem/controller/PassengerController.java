@@ -3,11 +3,12 @@ package com.example.flightmanagementsystem.controller;
 import com.example.flightmanagementsystem.model.Passenger;
 import com.example.flightmanagementsystem.service.PassengerService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Sort; // IMPORT
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes; // IMPORT
 
 import java.util.List;
 
@@ -21,10 +22,14 @@ public class PassengerController {
         this.passengerService = passengerService;
     }
 
-    // --- METODA MODIFICATĂ PENTRU SORTARE ---
     @GetMapping
     public String listPassengers(
             Model model,
+            // Parametrii Filtrare
+            @RequestParam(required = false) String id,
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) String currency,
+            // Parametrii Sortare
             @RequestParam(defaultValue = "name") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
@@ -32,11 +37,17 @@ public class PassengerController {
                 Sort.by(sortBy).ascending() :
                 Sort.by(sortBy).descending();
 
-        List<Passenger> passengers = passengerService.findAll(sort);
+        // Apel Service cu Filtre
+        List<Passenger> passengers = passengerService.searchPassengers(id, name, currency, sort);
 
         model.addAttribute("passengers", passengers);
 
-        // Parametrii pentru View
+        // Retrimitere filtre
+        model.addAttribute("filterId", id);
+        model.addAttribute("filterName", name);
+        model.addAttribute("filterCurrency", currency);
+
+        // Retrimitere sortare
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");
@@ -93,9 +104,16 @@ public class PassengerController {
         return "redirect:/passengers";
     }
 
+    // --- MODIFICARE PENTRU AFISARE EROARE LA STERGERE ---
     @PostMapping("/{id}/delete")
-    public String deletePassenger(@PathVariable String id) {
-        passengerService.delete(id);
+    public String deletePassenger(@PathVariable String id, RedirectAttributes redirectAttributes) {
+        try {
+            passengerService.delete(id);
+            redirectAttributes.addFlashAttribute("successMessage", "Passenger deleted successfully.");
+        } catch (IllegalStateException e) {
+            // Prindem excepția de business (zboruri viitoare) și trimitem mesajul
+            redirectAttributes.addFlashAttribute("errorMessage", e.getMessage());
+        }
         return "redirect:/passengers";
     }
 

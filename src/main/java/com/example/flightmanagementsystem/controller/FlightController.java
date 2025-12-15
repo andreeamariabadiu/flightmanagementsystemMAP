@@ -6,12 +6,14 @@ import com.example.flightmanagementsystem.service.AirplaneService;
 import com.example.flightmanagementsystem.service.FlightService;
 import com.example.flightmanagementsystem.service.NoticeBoardService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Sort; // IMPORT NOU
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat; // IMPORT
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Controller
@@ -30,25 +32,41 @@ public class FlightController {
         this.noticeBoardService = noticeBoardService;
     }
 
-    // --- METODA MODIFICATĂ PENTRU SORTARE ---
+    // --- METODA PRINCIPALĂ ---
     @GetMapping
     public String listFlights(
             Model model,
-            @RequestParam(defaultValue = "departureTime") String sortBy, // Implicit: cronologic
+            // Parametrii de Filtrare
+            @RequestParam(required = false) String id,
+            @RequestParam(required = false) Status status,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime minTime,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm") LocalDateTime maxTime,
+            // Parametrii de Sortare
+            @RequestParam(defaultValue = "departureTime") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
         Sort sort = sortDir.equalsIgnoreCase("asc") ?
                 Sort.by(sortBy).ascending() :
                 Sort.by(sortBy).descending();
 
-        List<Flight> flights = flightService.findAll(sort);
+        // Apel Service cu Filtre
+        List<Flight> flights = flightService.searchFlights(id, status, minTime, maxTime, sort);
 
         model.addAttribute("flights", flights);
 
-        // Parametrii pentru View
+        // Retrimitem filtrele
+        model.addAttribute("filterId", id);
+        model.addAttribute("filterStatus", status);
+        model.addAttribute("filterMinTime", minTime);
+        model.addAttribute("filterMaxTime", maxTime);
+
+        // Retrimitem sortarea
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");
+
+        // Listă statusuri pentru dropdown-ul de filtrare
+        model.addAttribute("allStatuses", Status.values());
 
         return "flight/index";
     }

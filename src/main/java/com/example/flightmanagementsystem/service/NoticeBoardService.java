@@ -2,9 +2,13 @@ package com.example.flightmanagementsystem.service;
 
 import com.example.flightmanagementsystem.model.NoticeBoard;
 import com.example.flightmanagementsystem.repository.NoticeBoardRepository;
-import org.springframework.data.domain.Sort; // IMPORT
+import jakarta.persistence.criteria.Predicate;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
@@ -50,16 +54,54 @@ public class NoticeBoardService {
 
     public Optional<NoticeBoard> findById(String id) { return repository.findById(id); }
 
-    // --- METODE PENTRU SORTARE ---
-
-    // 1. Pentru DataInitializer
     public List<NoticeBoard> findAll() { return repository.findAll(); }
 
-    // 2. Pentru Controller
-    public List<NoticeBoard> findAll(Sort sort) {
-        // Sortare custom după numărul de zboruri
+    // --- METODA COMPLEXĂ: CĂUTARE + FILTRARE + SORTARE ---
+    public List<NoticeBoard> searchNoticeBoards(
+            String id,
+            LocalDate minDate,
+            LocalDate maxDate,
+            Integer minFlights, // Parametru NOU
+            Integer maxFlights, // Parametru NOU
+            Sort sort
+    ) {
+        // 1. Construim Specificația (Filtrele SQL)
+        Specification<NoticeBoard> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // Filtru ID (Parțial)
+            if (id != null && !id.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("id")), "%" + id.toLowerCase() + "%"));
+            }
+
+            // Filtru Dată (Min)
+            if (minDate != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("date"), minDate));
+            }
+
+            // Filtru Dată (Max)
+            if (maxDate != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("date"), maxDate));
+            }
+
+            // Filtru Număr Zboruri (Min) - folosind mărimea listei flightsOfTheDay
+            if (minFlights != null) {
+                predicates.add(cb.greaterThanOrEqualTo(cb.size(root.get("flightsOfTheDay")), minFlights));
+            }
+
+            // Filtru Număr Zboruri (Max)
+            if (maxFlights != null) {
+                predicates.add(cb.lessThanOrEqualTo(cb.size(root.get("flightsOfTheDay")), maxFlights));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        // 2. Gestionăm Sortarea
+        // Caz special: Sortare după numărul de zboruri (flightCount) - în memorie
         if (sort.getOrderFor("flightCount") != null) {
-            List<NoticeBoard> boards = repository.findAll();
+            // Luăm datele filtrate din DB
+            List<NoticeBoard> filteredList = repository.findAll(spec);
 
             Sort.Order order = sort.getOrderFor("flightCount");
             Comparator<NoticeBoard> comparator = Comparator.comparingInt(nb -> nb.getFlightsOfTheDay().size());
@@ -68,12 +110,17 @@ public class NoticeBoardService {
                 comparator = comparator.reversed();
             }
 
-            return boards.stream()
+            return filteredList.stream()
                     .sorted(comparator)
                     .collect(Collectors.toList());
         }
 
-        // Sortare standard DB
-        return repository.findAll(sort);
+        // Caz standard: Sortare DB
+        return repository.findAll(spec, sort);
+    }
+
+    // Compatibilitate
+    public List<NoticeBoard> findAll(Sort sort) {
+        return searchNoticeBoards(null, null, null, null, null, sort);
     }
 }

@@ -38,167 +38,190 @@ public class DataInitializer implements CommandLineRunner {
 
     @Override
     public void run(String... args) throws Exception {
-        // 1. CURĂȚENIE (Ștergem copilul înainte de părinte pentru a evita erori de Foreign Key)
-        System.out.println("--- Curățare bază de date... ---");
-        luggageRepository.deleteAll();
-        ticketRepository.deleteAll();
-        flightAssignmentRepository.deleteAll();
-        flightRepository.deleteAll();
+        System.out.println("--- 🧹 Curățare bază de date... ---");
+        try {
+            luggageRepository.deleteAll();
+            ticketRepository.deleteAll();
+            flightAssignmentRepository.deleteAll();
+            flightRepository.deleteAll();
+            airplaneRepository.deleteAll();
+            noticeBoardRepository.deleteAll();
+            passengerRepository.deleteAll();
+            airlineEmployeeRepository.deleteAll();
+            airportEmployeeRepository.deleteAll();
+        } catch (Exception e) {
+            System.out.println("--- Baza de date era deja goală sau a apărut o eroare minoră: " + e.getMessage());
+        }
 
-        airplaneRepository.deleteAll();
-        noticeBoardRepository.deleteAll();
-        passengerRepository.deleteAll();
-        airlineEmployeeRepository.deleteAll();
-        airportEmployeeRepository.deleteAll();
+        System.out.println("--- 🚀 Inițializare cu DATE REALISTE ---");
 
-        System.out.println("--- Inițializare date (10+ înregistrări per tabel)... ---");
+        Random random = new Random();
 
-        // 2. CREARE PĂRINȚI
-
-        // --- Airplanes ---
+        // 1. AIRPLANES (Flota Reală)
+        // Folosim modele reale de avioane și coduri de înregistrare
+        String[] planeModels = {"Boeing 737-800", "Airbus A320neo", "Boeing 787 Dreamliner", "Airbus A350-900", "Embraer E190"};
         List<Airplane> airplanes = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
+
+        for (int i = 0; i < 10; i++) {
             Airplane a = new Airplane();
-            a.setId("AP-" + i);
-            a.setAirplaneNumber(100 + i);
+            // ID: AP-B737, AP-A320 etc. (un prefix + index)
+            a.setId(String.format("AP-%03d", i + 1));
+            a.setAirplaneNumber(1000 + i * 5); // Număr intern de flotă
             airplanes.add(airplaneRepository.save(a));
         }
 
-        // --- NoticeBoards ---
+        // 2. NOTICE BOARDS (Următoarele 10 zile)
         List<NoticeBoard> noticeBoards = new ArrayList<>();
         LocalDate today = LocalDate.now();
         for (int i = 0; i < 10; i++) {
             NoticeBoard nb = new NoticeBoard();
-            nb.setId("NB-" + i);
+            nb.setId(String.format("NB-%s", today.plusDays(i).toString())); // ID bazat pe dată: NB-2023-12-01
             nb.setDate(today.plusDays(i));
             noticeBoards.add(noticeBoardRepository.save(nb));
         }
 
-        // --- Passengers ---
+        // 3. PASSENGERS (Nume Reale)
+        String[] firstNames = {"John", "Emma", "Michael", "Sophia", "William", "Olivia", "James", "Ava", "Alexander", "Isabella", "David", "Mia"};
+        String[] lastNames = {"Smith", "Johnson", "Brown", "Taylor", "Anderson", "Thomas", "Jackson", "White", "Harris", "Martin", "Thompson", "Garcia"};
+
         List<Passenger> passengers = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
+        for (int i = 0; i < 12; i++) {
             Passenger p = new Passenger();
-            p.setId("PAX-" + i);
-            p.setName("Passenger " + i);
-            p.setCurrency(i % 2 == 0 ? "USD" : "EUR");
+            p.setId(String.format("PAX-%04d", 2000 + i));
+
+            String fullName = firstNames[i % firstNames.length] + " " + lastNames[i % lastNames.length];
+            p.setName(fullName);
+
+            p.setCurrency(i % 3 == 0 ? "EUR" : (i % 3 == 1 ? "USD" : "GBP"));
             passengers.add(passengerRepository.save(p));
         }
 
-        // --- Airline Employees (Crew) ---
+        // 4. AIRLINE EMPLOYEES (Crew - Piloti si Insotitori)
+        String[] crewNames = {"Capt. Maverick", "Capt. Sully", "Amelia Earhart", "Charles Lindbergh", "Bessie Coleman", "Howard Hughes", "Chuck Yeager", "Buzz Aldrin", "Neil Armstrong", "Yuri Gagarin"};
         List<AirlineEmployee> airlineEmployees = new ArrayList<>();
-        for (int i = 1; i <= 10; i++) {
-            AirlineEmployee ae = new AirlineEmployee();
-            ae.setId("CREW-" + i);
-            ae.setName("Flight Crew " + i);
-            ae.setLicenseNumber("LIC-" + (5000 + i));
-            ae.setRegistrationDate(LocalDate.of(2022, 1, 1).plusMonths(i));
 
-            // Logica corectă folosind Enum-ul tău ROLE
-            if (i <= 3) {
-                ae.setRole(Role.PILOT);
-            } else if (i <= 6) {
-                ae.setRole(Role.CO_PILOT);
-            } else {
-                ae.setRole(Role.FLIGHT_ATTENDANT); // Corectat din CREW
-            }
+        for (int i = 0; i < 10; i++) {
+            AirlineEmployee ae = new AirlineEmployee();
+            ae.setId(String.format("CREW-%03d", i + 1));
+            ae.setName(crewNames[i]);
+            ae.setLicenseNumber(String.format("LIC-%05d", 80000 + i * 123)); // Licențe unice
+            ae.setRegistrationDate(LocalDate.of(2018, 1, 1).plusMonths(i * 3));
+
+            if (i < 3) ae.setRole(Role.PILOT);
+            else if (i < 6) ae.setRole(Role.CO_PILOT);
+            else ae.setRole(Role.FLIGHT_ATTENDANT);
 
             airlineEmployees.add(airlineEmployeeRepository.save(ae));
         }
 
-        // --- Airport Employees (Staff Sol) ---
-        for (int i = 1; i <= 10; i++) {
+        // 5. AIRPORT EMPLOYEES (Staff la sol)
+        String[] staffNames = {"Sarah Connor", "Ellen Ripley", "Han Solo", "Leia Organa", "Luke Skywalker", "Marty McFly", "Doc Brown", "Tony Stark", "Bruce Wayne", "Clark Kent"};
+        for (int i = 0; i < 10; i++) {
             AirportEmployee ape = new AirportEmployee();
-            ape.setId("GND-" + i);
-            ape.setName("Ground Staff " + i);
+            ape.setId(String.format("STAFF-%03d", i + 1));
+            ape.setName(staffNames[i]);
+            ape.setDesignation(Designation.STAFF); // Sau MANAGER, depinde ce ai în Enum
 
-            // Folosim Enum-urile Designation și Department corecte
-            ape.setDesignation(Designation.STAFF);
-
-            // Rotim departamentele
-            if (i % 3 == 0) ape.setDepartment(Department.OPERATIONS); // Corectat din LOGISTICS
+            if (i % 3 == 0) ape.setDepartment(Department.OPERATIONS);
             else if (i % 3 == 1) ape.setDepartment(Department.MAINTENANCE);
             else ape.setDepartment(Department.CUSTOMER_SERVICE);
 
             airportEmployeeRepository.save(ape);
         }
 
-        // 3. CREARE COPII (Legături)
-
-        // --- Flights ---
+        // 6. FLIGHTS (Zboruri Reale)
+        String[] destinations = {"London Heathrow (LHR)", "Paris Charles de Gaulle (CDG)", "New York JFK", "Dubai International (DXB)", "Tokyo Haneda (HND)", "Frankfurt (FRA)", "Amsterdam Schiphol (AMS)", "Singapore Changi (SIN)", "Los Angeles (LAX)", "Sydney Kingsford Smith (SYD)"};
         List<Flight> flights = new ArrayList<>();
 
         for (int i = 0; i < 10; i++) {
-            Airplane ap = airplanes.get(i);
-            NoticeBoard nb = noticeBoards.get(i);
+            Airplane ap = airplanes.get(i % airplanes.size());
+            NoticeBoard nb = noticeBoards.get(i % noticeBoards.size()); // Un zbor pe zi
 
-            LocalDateTime depTime = nb.getDate().atTime(10 + (i % 5), 0);
-            LocalDateTime arrTime = depTime.plusHours(2);
+            LocalDateTime depTime = nb.getDate().atTime(8 + i, 30); // 08:30, 09:30...
+            LocalDateTime arrTime = depTime.plusHours(2 + random.nextInt(8)); // Zboruri între 2 și 10 ore
 
             Flight f = new Flight();
-            f.setId("FL-" + (100 + i));
-            f.setFlightName("Flight to City " + i);
+            // ID Zbor: RO301, BA550, LH402...
+            String flightCode = (i % 2 == 0 ? "RO" : "LH") + String.format("%03d", 300 + i * 15);
+            f.setId(flightCode);
+
+            f.setFlightName("Flight to " + destinations[i]);
             f.setDepartureTime(depTime);
             f.setArrivalTime(arrTime);
 
-            // Folosim Enum-ul STATUS corect
-            f.setStatus(Status.SCHEDULED);
+            // Status variat
+            if (i == 0) f.setStatus(Status.SCHEDULED);
+            else if (i == 1) f.setStatus(Status.DELAYED);
+            else if (i == 2) f.setStatus(Status.CANCELLED);
+            else if (i < 5) f.setStatus(Status.ON_TIME);
+            else f.setStatus(Status.SCHEDULED);
 
-            // RELAȚIILE IMPORTANTE (Setăm obiectele)
             f.setAirplane(ap);
             f.setNoticeBoard(nb);
 
             flights.add(flightRepository.save(f));
         }
 
-        // --- Tickets ---
+        // 7. TICKETS (Bilete)
         List<Ticket> tickets = new ArrayList<>();
-        for (int i = 0; i < 10; i++) {
-            Passenger pax = passengers.get(i);
-            Flight flight = flights.get(i);
+        for (int i = 0; i < 12; i++) { // 12 bilete pentru 10 zboruri
+            Passenger pax = passengers.get(i % passengers.size());
+            Flight flight = flights.get(i % flights.size());
 
             Ticket t = new Ticket();
-            t.setId("TKT-" + (500 + i));
-            t.setPrice(150.0 + (i * 10));
-            t.setSeatNumber("12" + (char)('A' + (i % 6)));
+            t.setId(String.format("TKT-%06d", 900000 + i * 7)); // ID Bilet lung: TKT-900007
+            t.setPrice(150.0 + random.nextInt(300)); // Preț între 150 și 450
 
-            // RELAȚII
+            // Locuri: 12A, 14C, etc.
+            String seat = (10 + i) + String.valueOf((char)('A' + (i % 6)));
+            t.setSeatNumber(seat);
+
             t.setPassenger(pax);
             t.setFlight(flight);
 
             tickets.add(ticketRepository.save(t));
         }
 
-        // --- Flight Assignments ---
+        // 8. FLIGHT ASSIGNMENTS (Echipaj pe zboruri)
         for (int i = 0; i < 10; i++) {
             Flight flight = flights.get(i);
-            AirlineEmployee emp = airlineEmployees.get(i);
+            // Punem un Pilot (index 0-2) și un Flight Attendant (index 6-9) pe fiecare zbor
+            AirlineEmployee pilot = airlineEmployees.get(i % 3);
+            AirlineEmployee attendant = airlineEmployees.get(6 + (i % 4));
 
-            FlightAssignment fa = new FlightAssignment();
-            fa.setId("ASN-" + (900 + i));
+            // Assignment Pilot
+            FlightAssignment fa1 = new FlightAssignment();
+            fa1.setId(String.format("ASN-%04d-P", i));
+            fa1.setFlight(flight);
+            fa1.setEmployee(pilot);
+            flightAssignmentRepository.save(fa1);
 
-            // RELAȚII
-            fa.setFlight(flight);
-            fa.setEmployee(emp);
-
-            flightAssignmentRepository.save(fa);
+            // Assignment Attendant
+            FlightAssignment fa2 = new FlightAssignment();
+            fa2.setId(String.format("ASN-%04d-A", i));
+            fa2.setFlight(flight);
+            fa2.setEmployee(attendant);
+            flightAssignmentRepository.save(fa2);
         }
 
-        // --- Luggage ---
-        for (int i = 0; i < 10; i++) {
+        // 9. LUGGAGE (Bagaje)
+        for (int i = 0; i < 12; i++) {
             Ticket t = tickets.get(i);
 
-            Luggage l = new Luggage();
-            l.setId("LUG-" + (8000 + i));
+            // Doar unii pasageri au bagaj
+            if (i % 3 != 0) {
+                Luggage l = new Luggage();
+                l.setId(String.format("BAG-%05d", 50000 + i * 9));
 
-            // Folosim Status din Luggage (CHECKED_IN este standard în modelul tău)
-            l.setStatus(Luggage.Status.CHECKED_IN);
+                if (i % 4 == 0) l.setStatus(Luggage.Status.LOADED);
+                else if (i % 4 == 1) l.setStatus(Luggage.Status.DELIVERED);
+                else l.setStatus(Luggage.Status.CHECKED_IN);
 
-            // RELAȚII
-            l.setTicket(t);
-
-            luggageRepository.save(l);
+                l.setTicket(t);
+                luggageRepository.save(l);
+            }
         }
 
-        System.out.println("--- Initializare completă: Datele au fost generate cu succes! ---");
+        System.out.println("--- ✅ Initializare completă cu DATE REALE! ---");
     }
 }

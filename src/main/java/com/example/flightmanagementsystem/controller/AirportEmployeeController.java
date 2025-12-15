@@ -5,7 +5,7 @@ import com.example.flightmanagementsystem.model.Department;
 import com.example.flightmanagementsystem.model.Designation;
 import com.example.flightmanagementsystem.service.AirportEmployeeService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Sort; // IMPORT
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -23,10 +23,14 @@ public class AirportEmployeeController {
         this.service = service;
     }
 
-    // --- METODA MODIFICATĂ PENTRU SORTARE ---
     @GetMapping
     public String list(
             Model model,
+            // Parametri Filtrare
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Designation designation,
+            @RequestParam(required = false) Department department,
+            // Parametri Sortare
             @RequestParam(defaultValue = "name") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
@@ -34,14 +38,24 @@ public class AirportEmployeeController {
                 Sort.by(sortBy).ascending() :
                 Sort.by(sortBy).descending();
 
-        List<AirportEmployee> employees = service.findAll(sort);
+        // Apelare Service cu filtre
+        List<AirportEmployee> employees = service.searchEmployees(name, designation, department, sort);
 
         model.addAttribute("employees", employees);
 
-        // Parametrii pentru View
+        // Retrimitem filtrele în pagină
+        model.addAttribute("filterName", name);
+        model.addAttribute("filterDesignation", designation);
+        model.addAttribute("filterDepartment", department);
+
+        // Retrimitem sortarea
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");
+
+        // Trimitem listele de ENUM pentru dropdown-urile de filtrare
+        model.addAttribute("allDesignations", Designation.values());
+        model.addAttribute("allDepartments", Department.values());
 
         return "airportemployee/index";
     }

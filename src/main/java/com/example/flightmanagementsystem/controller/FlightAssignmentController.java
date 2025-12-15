@@ -5,7 +5,7 @@ import com.example.flightmanagementsystem.service.AirlineEmployeeService;
 import com.example.flightmanagementsystem.service.FlightAssignmentService;
 import com.example.flightmanagementsystem.service.FlightService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Sort; // IMPORT NOU
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -29,10 +29,14 @@ public class FlightAssignmentController {
         this.employeeService = employeeService;
     }
 
-    // METODĂ ACTUALIZATĂ PENTRU SORTARE
     @GetMapping
     public String listAssignments(
             Model model,
+            // Parametrii Filtrare
+            @RequestParam(required = false) String assignmentId,
+            @RequestParam(required = false) String flightName,
+            @RequestParam(required = false) String employeeName,
+            // Parametrii Sortare
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
@@ -40,11 +44,17 @@ public class FlightAssignmentController {
                 Sort.by(sortBy).ascending() :
                 Sort.by(sortBy).descending();
 
-        List<FlightAssignment> assignments = flightAssignmentService.findAll(sort);
+        // Apelare Service cu filtre
+        List<FlightAssignment> assignments = flightAssignmentService.searchAssignments(assignmentId, flightName, employeeName, sort);
 
         model.addAttribute("flightAssignments", assignments);
 
-        // Parametrii pentru View
+        // Retrimitere filtre în pagină
+        model.addAttribute("filterId", assignmentId);
+        model.addAttribute("filterFlight", flightName);
+        model.addAttribute("filterEmployee", employeeName);
+
+        // Retrimitere sortare
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");

@@ -5,7 +5,7 @@ import com.example.flightmanagementsystem.service.FlightService;
 import com.example.flightmanagementsystem.service.PassengerService;
 import com.example.flightmanagementsystem.service.TicketService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Sort; // IMPORT
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -29,10 +29,14 @@ public class TicketController {
         this.passengerService = passengerService;
     }
 
-    // --- METODA MODIFICATĂ PENTRU SORTARE ---
     @GetMapping
     public String listTickets(
             Model model,
+            // Parametrii Filtrare
+            @RequestParam(required = false) String id,
+            @RequestParam(required = false) String flightName,
+            @RequestParam(required = false) String passengerName,
+            // Parametrii Sortare
             @RequestParam(defaultValue = "id") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
@@ -40,11 +44,17 @@ public class TicketController {
                 Sort.by(sortBy).ascending() :
                 Sort.by(sortBy).descending();
 
-        List<Ticket> tickets = ticketService.findAll(sort);
+        // Apel Service cu Filtre
+        List<Ticket> tickets = ticketService.searchTickets(id, flightName, passengerName, sort);
 
         model.addAttribute("tickets", tickets);
 
-        // Parametrii pentru View
+        // Retrimitere filtre
+        model.addAttribute("filterId", id);
+        model.addAttribute("filterFlight", flightName);
+        model.addAttribute("filterPassenger", passengerName);
+
+        // Retrimitere sortare
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");

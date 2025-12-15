@@ -3,12 +3,14 @@ package com.example.flightmanagementsystem.controller;
 import com.example.flightmanagementsystem.model.NoticeBoard;
 import com.example.flightmanagementsystem.service.NoticeBoardService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.Sort; // IMPORT
+import org.springframework.data.domain.Sort;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Controller
@@ -21,22 +23,37 @@ public class NoticeBoardController {
         this.service = service;
     }
 
-    // --- METODA MODIFICATĂ PENTRU SORTARE ---
     @GetMapping
     public String list(
             Model model,
-            @RequestParam(defaultValue = "date") String sortBy, // Implicit cronologic
+            // Parametrii Filtrare Standard
+            @RequestParam(required = false) String id,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate minDate,
+            @RequestParam(required = false) @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate maxDate,
+            // Parametrii Filtrare Noi (Zboruri)
+            @RequestParam(required = false) Integer minFlights,
+            @RequestParam(required = false) Integer maxFlights,
+            // Parametrii Sortare
+            @RequestParam(defaultValue = "date") String sortBy,
             @RequestParam(defaultValue = "asc") String sortDir
     ) {
         Sort sort = sortDir.equalsIgnoreCase("asc") ?
                 Sort.by(sortBy).ascending() :
                 Sort.by(sortBy).descending();
 
-        List<NoticeBoard> noticeboards = service.findAll(sort);
+        // Apel Service cu toate filtrele
+        List<NoticeBoard> noticeboards = service.searchNoticeBoards(id, minDate, maxDate, minFlights, maxFlights, sort);
 
         model.addAttribute("noticeboards", noticeboards);
 
-        // Parametrii pentru View
+        // Retrimitere filtre în pagină
+        model.addAttribute("filterId", id);
+        model.addAttribute("filterMinDate", minDate);
+        model.addAttribute("filterMaxDate", maxDate);
+        model.addAttribute("filterMinFlights", minFlights);
+        model.addAttribute("filterMaxFlights", maxFlights);
+
+        // Retrimitere sortare
         model.addAttribute("sortBy", sortBy);
         model.addAttribute("sortDir", sortDir);
         model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");

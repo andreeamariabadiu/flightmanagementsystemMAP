@@ -3,129 +3,416 @@
 <head>
     <meta charset="UTF-8">
     <title>Flights | Flight Management System</title>
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
-        body { background: linear-gradient(135deg, #020617, #0f172a); min-height: 100vh; color: #e5e7eb; }
-        .page-wrapper { padding-top: 4rem; padding-bottom: 4rem; }
-        .card-main { background-color: #020617; border-radius: 18px; border: 1px solid rgba(148, 163, 184, 0.35); box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8); }
-        .navbar-brand { font-weight: 600; letter-spacing: .06em; color: #cbd5f5 !important; }
-        .btn-primary { border-radius: 999px; }
-        .table thead { background: rgba(15, 23, 42, 0.9); }
-        .badge-id { background: rgba(148, 163, 184, 0.15); border: 1px solid rgba(148, 163, 184, 0.3); color: #cbd5e1; font-size: 0.75rem; }
+        /* --- TEMPLATE DARK MODE --- */
+        :root {
+            --bg-body: #0b0f19;
+            --bg-card: #151e32;
+            --bg-input: #0f172a;
+            --text-main: #ffffff;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-cyan: #22d3ee;
+            --border-color: rgba(255, 255, 255, 0.15);
+        }
 
-        .status-pill { padding: 0.2rem 0.75rem; border-radius: 999px; font-size: 0.75rem; text-transform: uppercase; font-weight: 600; letter-spacing: .05em; }
-        .status-SCHEDULED { background: rgba(56, 189, 248, .15); color: #7dd3fc; border: 1px solid rgba(56, 189, 248, .3); }
-        .status-CANCELLED { background: rgba(239, 68, 68, .15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, .3); }
-        .status-LANDED { background: rgba(34, 197, 94, .15); color: #86efac; border: 1px solid rgba(34, 197, 94, .3); }
-        .status-ACTIVE { background: rgba(234, 179, 8, .15); color: #fde047; border: 1px solid rgba(234, 179, 8, .3); }
+        body {
+            background-color: var(--bg-body);
+            background-image: linear-gradient(to bottom right, #0b0f19, #111827);
+            min-height: 100vh;
+            color: var(--text-muted);
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+        }
 
-        /* Sort Styles */
-        .sortable { color: #cbd5e1; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
-        .sortable:hover { color: #fff; }
-        .sort-icon { width: 0; height: 0; border-style: solid; opacity: 0.7; }
-        .sort-up { border-width: 0 4px 6px 4px; border-color: transparent transparent #60a5fa transparent; }
-        .sort-down { border-width: 6px 4px 0 4px; border-color: #60a5fa transparent transparent transparent; }
-        .sorted-text { color: #60a5fa; font-weight: 700; }
+        .page-wrapper { padding-top: 2rem; padding-bottom: 4rem; }
+
+        /* --- CARD STYLE --- */
+        .card-main {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+        }
+
+        .page-title { color: var(--text-main); font-weight: 700; letter-spacing: -0.5px; }
+
+        /* --- FILTRARE --- */
+        .filter-section {
+            background-color: rgba(0, 0, 0, 0.2);
+            border-bottom: 1px solid var(--border-color);
+            padding: 1.5rem;
+        }
+
+        .filter-label {
+            color: #cbd5e1;
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .form-control, .form-select, .input-group-text {
+            background-color: var(--bg-input);
+            border: 1px solid #334155;
+            color: var(--text-main);
+        }
+        .form-control:focus, .form-select:focus {
+            background-color: var(--bg-input);
+            border-color: var(--accent-blue);
+            color: var(--text-main);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+        }
+        .form-control::placeholder { color: #64748b; }
+        .input-group-text { color: var(--text-muted); }
+
+        /* --- TABEL --- */
+        .table-custom {
+            margin-bottom: 0;
+            --bs-table-bg: transparent;
+            --bs-table-border-color: var(--border-color);
+        }
+
+        .table-custom thead th {
+            background-color: rgba(20, 30, 50, 0.9);
+            color: #cbd5e1;
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            padding: 1rem;
+            border-bottom: 2px solid #334155;
+            letter-spacing: 0.5px;
+        }
+
+        .table-custom tbody td {
+            vertical-align: middle;
+            padding: 1rem;
+            color: var(--text-main);
+        }
+
+        .table-hover tbody tr:hover {
+            background-color: rgba(59, 130, 246, 0.08);
+        }
+
+        /* --- ELEMENTE SPECIFICE --- */
+        .flight-id {
+            color: #fff;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        .flight-name { font-size: 0.85rem; color: #94a3b8; }
+
+        /* DATA SI ORA VIZIBILE */
+        .time-display {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: #ffffff; /* Alb pur */
+            letter-spacing: 0.5px;
+        }
+        .date-display {
+            font-size: 0.85rem;
+            color: var(--accent-cyan); /* Cyan pentru vizibilitate maxima */
+            font-weight: 500;
+            text-transform: uppercase;
+        }
+
+        /* --- STATUS PILLS (Vizibile & Colorate Distinct) --- */
+        .status-pill {
+            padding: 0.4em 1em;
+            border-radius: 6px;
+            font-size: 0.75rem;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: inline-block;
+            min-width: 110px;
+            text-align: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            border: 1px solid transparent;
+        }
+
+        /* 1. SCHEDULED - ALBASTRU */
+        .status-SCHEDULED {
+            background: rgba(59, 130, 246, 0.15);
+            color: #60a5fa;
+            border-color: rgba(59, 130, 246, 0.4);
+        }
+
+        /* 2. ON_TIME - VERDE */
+        .status-ON_TIME {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            border-color: rgba(16, 185, 129, 0.4);
+        }
+
+        /* 3. DELAYED - PORTOCALIU */
+        .status-DELAYED {
+            background: rgba(245, 158, 11, 0.15);
+            color: #fbbf24;
+            border-color: rgba(245, 158, 11, 0.4);
+        }
+
+        /* 4. CANCELLED - ROȘU */
+        .status-CANCELLED {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border-color: rgba(239, 68, 68, 0.4);
+        }
+
+        /* 5. LANDED - VIOLET */
+        .status-LANDED {
+            background: rgba(139, 92, 246, 0.15);
+            color: #a78bfa;
+            border-color: rgba(139, 92, 246, 0.4);
+        }
+
+        /* Sortare */
+        .sort-link {
+            text-decoration: none;
+            color: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: color 0.2s;
+        }
+        .sort-link.active { color: var(--accent-blue); }
+        .sort-link:hover { color: #fff; }
+
+        /* --- BUTTONS & DROPDOWNS --- */
+        .btn-new {
+            background-color: var(--accent-blue);
+            border: none; color: white; font-weight: 600; padding: 0.6rem 1.5rem;
+        }
+        .btn-new:hover { background-color: #2563eb; }
+
+        .btn-filter {
+            background-color: var(--accent-blue); border: none; color: white; font-weight: 600;
+        }
+        .btn-filter:hover { background-color: #2563eb; }
+
+        .btn-actions {
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            background: transparent;
+            font-weight: 500;
+            padding: 0.4rem 1rem;
+        }
+        .btn-actions:hover, .btn-actions.show {
+            background-color: #334155;
+            color: white;
+            border-color: #64748b;
+        }
+
+        .dropdown-menu-dark {
+            background-color: #1e293b;
+            border: 1px solid #475569;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        }
+        .dropdown-item { color: #e2e8f0; padding: 0.5rem 1rem;}
+        .dropdown-item:hover { background-color: #334155; color: white; }
+        .dropdown-divider { border-top-color: #475569; }
     </style>
 </head>
 <body>
 
-<nav class="navbar navbar-dark bg-transparent px-4 pt-3">
-    <a class="navbar-brand" href="/">✈ Flight Management System</a>
-    <div class="d-flex gap-2">
-        <a href="/" class="btn btn-outline-light btn-sm">← Dashboard</a>
+<nav class="navbar navbar-dark bg-transparent px-4 pt-4 mb-3">
+    <div class="d-flex align-items-center gap-3">
+        <a href="/" class="btn btn-outline-secondary btn-sm rounded-pill px-3 text-light border-secondary">
+            <i class="bi bi-arrow-left me-1"></i> Dashboard
+        </a>
     </div>
 </nav>
 
 <div class="container page-wrapper">
     <div class="row justify-content-center">
-        <div class="col-lg-12">
+        <div class="col-12 col-xxl-11">
+
             <div class="card card-main">
-                <div class="card-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-center">
+
+                <div class="card-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-end bg-transparent">
                     <div>
-                        <h3 class="mb-1 text-light">Flight Schedule</h3>
-                        <p class="text-muted mb-0" style="font-size: 0.9rem;">Manage departures, arrivals and flight status.</p>
+                        <h3 class="page-title mb-1">
+                            <i class="bi bi-airplane-fill me-2 text-primary opacity-75"></i>Flights
+                        </h3>
+                        <p class="text-muted mb-3">Manage flight schedules, status, and assignments.</p>
                     </div>
-                    <a href="/flights/new" class="btn btn-primary btn-sm">+ Schedule Flight</a>
+                    <div class="mb-3">
+                        <a href="/flights/new" class="btn btn-new rounded-pill">
+                            <i class="bi bi-plus-lg me-1"></i> New Flight
+                        </a>
+                    </div>
                 </div>
 
-                <div class="card-body px-4 pb-4 pt-3">
-                    <div th:if="${#lists.isEmpty(flights)}" class="text-center text-muted py-4">
-                        No flights scheduled. Click <strong>“Schedule Flight”</strong> to create one.
+                <div class="filter-section mt-2">
+                    <form method="get" action="/flights">
+                        <input type="hidden" name="sortBy" th:value="${sortBy}" />
+                        <input type="hidden" name="sortDir" th:value="${sortDir}" />
+
+                        <div class="row g-3">
+                            <div class="col-md-3">
+                                <div class="filter-label">Search Flight ID</div>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-search"></i></span>
+                                    <input type="text" name="id" class="form-control border-start-0"
+                                           th:value="${filterId}" placeholder="e.g. FL-101">
+                                </div>
+                            </div>
+
+                            <div class="col-md-2">
+                                <div class="filter-label">Status</div>
+                                <select name="status" class="form-select">
+                                    <option value="">All Statuses</option>
+                                    <option th:each="s : ${allStatuses}"
+                                            th:value="${s}"
+                                            th:text="${s}"
+                                            th:selected="${s == filterStatus}"></option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <div class="filter-label">Departure Time Range</div>
+                                <div class="input-group">
+                                    <input type="datetime-local" name="minTime" class="form-control" th:value="${filterMinTime}">
+                                    <span class="input-group-text px-2 text-muted border-start-0 border-end-0">-</span>
+                                    <input type="datetime-local" name="maxTime" class="form-control" th:value="${filterMaxTime}">
+                                </div>
+                            </div>
+
+                            <div class="col-md-3 d-flex align-items-end gap-2">
+                                <button type="submit" class="btn btn-filter w-100">
+                                    <i class="bi bi-funnel-fill me-1"></i> Filter
+                                </button>
+                                <a href="/flights" class="btn btn-outline-secondary px-3" title="Reset Filters">
+                                    <i class="bi bi-x-lg"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card-body p-0">
+                    <div th:if="${#lists.isEmpty(flights)}" class="text-center text-muted py-5 my-4">
+                        <i class="bi bi-inbox fs-1 d-block mb-3 opacity-25"></i>
+                        <p class="mb-1">No flights found matching your criteria.</p>
+                        <small>Try adjusting filters or create a new flight.</small>
+                        <div class="mt-3">
+                            <a href="/flights" class="btn btn-sm btn-outline-light">Clear Filters</a>
+                        </div>
                     </div>
 
                     <div th:if="${!#lists.isEmpty(flights)}" class="table-responsive">
-                        <table class="table table-dark table-borderless align-middle mb-0">
+                        <table class="table table-custom table-hover align-middle">
                             <thead>
                             <tr>
-                                <th scope="col" class="ps-3">
-                                    <a th:href="@{/flights(sortBy='flightName', sortDir=${sortBy == 'flightName' ? reverseSortDir : 'asc'})}"
-                                       class="sortable" th:classappend="${sortBy == 'flightName' ? 'sorted-text' : ''}">
+                                <th scope="col" style="width: 25%;">
+                                    <a th:href="@{/flights(
+                                        sortBy='id', sortDir=${sortBy == 'id' ? reverseSortDir : 'asc'},
+                                        id=${filterId}, status=${filterStatus}, minTime=${filterMinTime}, maxTime=${filterMaxTime}
+                                    )}" class="sort-link" th:classappend="${sortBy == 'id' ? 'active' : ''}">
                                         Flight
-                                        <span th:if="${sortBy == 'flightName'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
+                                        <i class="bi sort-icon"
+                                           th:classappend="${sortBy == 'id' ? (sortDir == 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-down-alt') : 'bi-arrow-down-up opacity-25'}"></i>
                                     </a>
                                 </th>
 
-                                <th scope="col">
-                                    <div class="d-flex gap-3">
-                                        <a th:href="@{/flights(sortBy='departureTime', sortDir=${sortBy == 'departureTime' ? reverseSortDir : 'asc'})}"
-                                           class="sortable" th:classappend="${sortBy == 'departureTime' ? 'sorted-text' : ''}">
-                                            Departure
-                                            <span th:if="${sortBy == 'departureTime'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
-                                        </a>
-                                        /
-                                        <a th:href="@{/flights(sortBy='arrivalTime', sortDir=${sortBy == 'arrivalTime' ? reverseSortDir : 'asc'})}"
-                                           class="sortable" th:classappend="${sortBy == 'arrivalTime' ? 'sorted-text' : ''}">
-                                            Arrival
-                                            <span th:if="${sortBy == 'arrivalTime'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
-                                        </a>
-                                    </div>
+                                <th scope="col" style="width: 20%;">
+                                    <a th:href="@{/flights(
+                                        sortBy='departureTime', sortDir=${sortBy == 'departureTime' ? reverseSortDir : 'asc'},
+                                        id=${filterId}, status=${filterStatus}, minTime=${filterMinTime}, maxTime=${filterMaxTime}
+                                    )}" class="sort-link" th:classappend="${sortBy == 'departureTime' ? 'active' : ''}">
+                                        Departure
+                                        <i class="bi sort-icon"
+                                           th:classappend="${sortBy == 'departureTime' ? (sortDir == 'asc' ? 'bi-sort-numeric-down' : 'bi-sort-numeric-down-alt') : 'bi-arrow-down-up opacity-25'}"></i>
+                                    </a>
                                 </th>
 
-                                <th scope="col">Resources</th>
+                                <th scope="col" style="width: 20%;">
+                                    <a th:href="@{/flights(
+                                        sortBy='arrivalTime', sortDir=${sortBy == 'arrivalTime' ? reverseSortDir : 'asc'},
+                                        id=${filterId}, status=${filterStatus}, minTime=${filterMinTime}, maxTime=${filterMaxTime}
+                                    )}" class="sort-link" th:classappend="${sortBy == 'arrivalTime' ? 'active' : ''}">
+                                        Arrival
+                                        <i class="bi sort-icon"
+                                           th:classappend="${sortBy == 'arrivalTime' ? (sortDir == 'asc' ? 'bi-sort-numeric-down' : 'bi-sort-numeric-down-alt') : 'bi-arrow-down-up opacity-25'}"></i>
+                                    </a>
+                                </th>
 
-                                <th scope="col">
-                                    <a th:href="@{/flights(sortBy='status', sortDir=${sortBy == 'status' ? reverseSortDir : 'asc'})}"
-                                       class="sortable" th:classappend="${sortBy == 'status' ? 'sorted-text' : ''}">
+                                <th scope="col" style="width: 15%;">
+                                    <a th:href="@{/flights(
+                                        sortBy='status', sortDir=${sortBy == 'status' ? reverseSortDir : 'asc'},
+                                        id=${filterId}, status=${filterStatus}, minTime=${filterMinTime}, maxTime=${filterMaxTime}
+                                    )}" class="sort-link" th:classappend="${sortBy == 'status' ? 'active' : ''}">
                                         Status
-                                        <span th:if="${sortBy == 'status'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
+                                        <i class="bi sort-icon"
+                                           th:classappend="${sortBy == 'status' ? (sortDir == 'asc' ? 'bi-sort-alpha-down' : 'bi-sort-alpha-down-alt') : 'bi-arrow-down-up opacity-25'}"></i>
                                     </a>
                                 </th>
 
-                                <th scope="col" class="text-end pe-3">Actions</th>
+                                <th scope="col" class="text-end pe-4">Actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr th:each="f : ${flights}">
-                                <td class="ps-3">
-                                    <div class="d-flex flex-column">
-                                        <span class="fw-bold text-white" th:text="${f.flightName}"></span>
-                                        <span class="badge badge-id mt-1 w-auto" style="width: fit-content;" th:text="'ID: ' + ${f.id}"></span>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        <div class="rounded-circle bg-dark border border-secondary d-flex align-items-center justify-content-center text-light me-3"
+                                             style="width: 40px; height: 40px;">
+                                            <i class="bi bi-send-fill small"></i>
+                                        </div>
+                                        <div>
+                                            <div class="flight-id" th:text="${f.id}"></div>
+                                            <div class="flight-name" th:text="${f.flightName}"></div>
+                                        </div>
                                     </div>
                                 </td>
+
                                 <td>
-                                    <div class="d-flex flex-column small">
-                                        <span class="text-info">🛫 <span th:text="${#temporals.format(f.departureTime, 'MMM dd, HH:mm')}"></span></span>
-                                        <span class="text-warning mt-1">🛬 <span th:text="${#temporals.format(f.arrivalTime, 'MMM dd, HH:mm')}"></span></span>
-                                    </div>
+                                    <div class="time-display" th:text="${#temporals.format(f.departureTime, 'HH:mm')}"></div>
+                                    <div class="date-display" th:text="${#temporals.format(f.departureTime, 'dd MMM yyyy')}"></div>
                                 </td>
+
                                 <td>
-                                    <div class="small text-muted">
-                                        <div>✈ Plane: <span class="text-light" th:text="${f.airplane != null ? f.airplane.id : 'N/A'}"></span></div>
-                                        <div>🗓 Board: <span class="text-light" th:text="${f.noticeBoard != null ? #temporals.format(f.noticeBoard.date, 'yyyy-MM-dd') : 'N/A'}"></span></div>
-                                    </div>
+                                    <div class="time-display" th:text="${#temporals.format(f.arrivalTime, 'HH:mm')}"></div>
+                                    <div class="date-display" th:text="${#temporals.format(f.arrivalTime, 'dd MMM yyyy')}"></div>
                                 </td>
+
                                 <td>
-                                    <span class="status-pill" th:classappend="'status-' + ${f.status}" th:text="${f.status}"></span>
+                                    <span class="status-pill"
+                                          th:classappend="'status-' + ${f.status}"
+                                          th:text="${f.status}">
+                                    </span>
                                 </td>
-                                <td class="text-end pe-3">
-                                    <div class="btn-group btn-group-sm">
-                                        <a th:href="@{'/flights/' + ${f.id} + '/details'}" class="btn btn-outline-light">Details</a>
-                                        <a th:href="@{'/flights/' + ${f.id} + '/edit'}" class="btn btn-outline-primary">Edit</a>
-                                        <form th:action="@{'/flights/' + ${f.id} + '/delete'}" method="post" style="display:contents;">
-                                            <button type="submit" class="btn btn-outline-danger" onclick="return confirm('Cancel/Delete this flight?');">Delete</button>
-                                        </form>
+
+                                <td class="text-end pe-4">
+                                    <div class="dropdown">
+                                        <button class="btn btn-sm btn-actions dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                            Actions
+                                        </button>
+                                        <ul class="dropdown-menu dropdown-menu-dark dropdown-menu-end shadow-lg">
+                                            <li>
+                                                <a class="dropdown-item" th:href="@{'/flights/' + ${f.id} + '/details'}">
+                                                    <i class="bi bi-eye me-2 text-info opacity-75"></i> View Details
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <a class="dropdown-item" th:href="@{'/flights/' + ${f.id} + '/edit'}">
+                                                    <i class="bi bi-pencil me-2 text-warning opacity-75"></i> Edit Flight
+                                                </a>
+                                            </li>
+                                            <li><hr class="dropdown-divider opacity-25"></li>
+                                            <li>
+                                                <form th:action="@{'/flights/' + ${f.id} + '/delete'}" method="post" style="display:inline;">
+                                                    <button type="submit" class="dropdown-item text-danger" onclick="return confirm('Delete this flight?');">
+                                                        <i class="bi bi-trash me-2"></i> Delete
+                                                    </button>
+                                                </form>
+                                            </li>
+                                        </ul>
                                     </div>
                                 </td>
                             </tr>
@@ -134,9 +421,15 @@
                     </div>
                 </div>
             </div>
+
+            <div class="text-center mt-5 text-muted small opacity-50">
+                Flight Management System &copy; 2024
+            </div>
+
         </div>
     </div>
 </div>
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

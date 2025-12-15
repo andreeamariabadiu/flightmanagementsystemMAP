@@ -6,9 +6,12 @@ import com.example.flightmanagementsystem.model.Ticket;
 import com.example.flightmanagementsystem.repository.FlightRepository;
 import com.example.flightmanagementsystem.repository.PassengerRepository;
 import com.example.flightmanagementsystem.repository.TicketRepository;
-import org.springframework.data.domain.Sort; // IMPORT
+import jakarta.persistence.criteria.Predicate; // IMPORT
+import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification; // IMPORT
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,7 +53,6 @@ public class TicketService {
     public Ticket createTicket(Ticket ticket, String flightId, String passengerId) {
         Flight flight = flightRepository.findById(flightId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Flight ID: " + flightId));
-
         Passenger passenger = passengerRepository.findById(passengerId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Passenger ID: " + passengerId));
 
@@ -64,7 +66,6 @@ public class TicketService {
     public void updateTicket(String id, Ticket update, String flightId, String passengerId) {
         Flight flight = flightRepository.findById(flightId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Flight ID"));
-
         Passenger passenger = passengerRepository.findById(passengerId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Passenger ID"));
 
@@ -86,13 +87,41 @@ public class TicketService {
 
     public Optional<Ticket> findById(String id) { return ticketRepository.findById(id); }
 
-    // --- METODE PENTRU SORTARE ---
-
-    // 1. Folosită de DataInitializer
     public List<Ticket> findAll() { return ticketRepository.findAll(); }
 
-    // 2. Folosită de Controller pentru Sortare
+    // --- METODA COMPLEXĂ: CĂUTARE + FILTRARE + SORTARE ---
+    public List<Ticket> searchTickets(
+            String id,
+            String flightName,
+            String passengerName,
+            Sort sort
+    ) {
+        Specification<Ticket> spec = (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+
+            // 1. Filtru ID Bilet (Parțial)
+            if (id != null && !id.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("id")), "%" + id.toLowerCase() + "%"));
+            }
+
+            // 2. Filtru Nume Zbor (Navigare prin relația 'flight')
+            if (flightName != null && !flightName.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("flight").get("flightName")), "%" + flightName.toLowerCase() + "%"));
+            }
+
+            // 3. Filtru Nume Pasager (Navigare prin relația 'passenger')
+            if (passengerName != null && !passengerName.trim().isEmpty()) {
+                predicates.add(cb.like(cb.lower(root.get("passenger").get("name")), "%" + passengerName.toLowerCase() + "%"));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+
+        return ticketRepository.findAll(spec, sort);
+    }
+
+    // Compatibilitate
     public List<Ticket> findAll(Sort sort) {
-        return ticketRepository.findAll(sort);
+        return searchTickets(null, null, null, sort);
     }
 }
