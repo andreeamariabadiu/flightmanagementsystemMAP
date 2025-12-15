@@ -4,10 +4,12 @@ import com.example.flightmanagementsystem.model.AirlineEmployee;
 import com.example.flightmanagementsystem.model.Role;
 import com.example.flightmanagementsystem.service.AirlineEmployeeService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Sort; // IMPORT NOU
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+import java.util.List; // Asigură-te că importul este prezent
 
 @Controller
 @RequestMapping("/airline-employees")
@@ -19,9 +21,27 @@ public class AirlineEmployeeController {
         this.service = service;
     }
 
+    // METODA MODIFICATĂ: Acceptă parametri de sortare și trimite starea curentă către Model
     @GetMapping
-    public String listEmployees(Model model) {
-        model.addAttribute("airlineEmployees", service.findAll());
+    public String listEmployees(
+            Model model,
+            @RequestParam(defaultValue = "name") String sortBy, // Câmpul implicit de sortare
+            @RequestParam(defaultValue = "asc") String sortDir // Direcția implicită de sortare
+    ) {
+        // Creăm obiectul Sort pe baza parametrilor
+        Sort sort = sortDir.equalsIgnoreCase("asc") ?
+                Sort.by(sortBy).ascending() :
+                Sort.by(sortBy).descending();
+
+        List<AirlineEmployee> employees = service.findAll(sort);
+
+        model.addAttribute("airlineEmployees", employees);
+
+        // Trimitem starea curentă a sortării înapoi la View
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");
+
         return "airlineemployee/index";
     }
 

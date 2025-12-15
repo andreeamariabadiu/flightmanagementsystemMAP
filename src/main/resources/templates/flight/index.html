@@ -19,6 +19,14 @@
         .status-CANCELLED { background: rgba(239, 68, 68, .15); color: #fca5a5; border: 1px solid rgba(239, 68, 68, .3); }
         .status-LANDED { background: rgba(34, 197, 94, .15); color: #86efac; border: 1px solid rgba(34, 197, 94, .3); }
         .status-ACTIVE { background: rgba(234, 179, 8, .15); color: #fde047; border: 1px solid rgba(234, 179, 8, .3); }
+
+        /* Sort Styles */
+        .sortable { color: #cbd5e1; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+        .sortable:hover { color: #fff; }
+        .sort-icon { width: 0; height: 0; border-style: solid; opacity: 0.7; }
+        .sort-up { border-width: 0 4px 6px 4px; border-color: transparent transparent #60a5fa transparent; }
+        .sort-down { border-width: 6px 4px 0 4px; border-color: #60a5fa transparent transparent transparent; }
+        .sorted-text { color: #60a5fa; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -51,10 +59,40 @@
                         <table class="table table-dark table-borderless align-middle mb-0">
                             <thead>
                             <tr>
-                                <th scope="col" class="ps-3">Flight</th>
-                                <th scope="col">Route / Time</th>
+                                <th scope="col" class="ps-3">
+                                    <a th:href="@{/flights(sortBy='flightName', sortDir=${sortBy == 'flightName' ? reverseSortDir : 'asc'})}"
+                                       class="sortable" th:classappend="${sortBy == 'flightName' ? 'sorted-text' : ''}">
+                                        Flight
+                                        <span th:if="${sortBy == 'flightName'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
+                                    </a>
+                                </th>
+
+                                <th scope="col">
+                                    <div class="d-flex gap-3">
+                                        <a th:href="@{/flights(sortBy='departureTime', sortDir=${sortBy == 'departureTime' ? reverseSortDir : 'asc'})}"
+                                           class="sortable" th:classappend="${sortBy == 'departureTime' ? 'sorted-text' : ''}">
+                                            Departure
+                                            <span th:if="${sortBy == 'departureTime'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
+                                        </a>
+                                        /
+                                        <a th:href="@{/flights(sortBy='arrivalTime', sortDir=${sortBy == 'arrivalTime' ? reverseSortDir : 'asc'})}"
+                                           class="sortable" th:classappend="${sortBy == 'arrivalTime' ? 'sorted-text' : ''}">
+                                            Arrival
+                                            <span th:if="${sortBy == 'arrivalTime'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
+                                        </a>
+                                    </div>
+                                </th>
+
                                 <th scope="col">Resources</th>
-                                <th scope="col">Status</th>
+
+                                <th scope="col">
+                                    <a th:href="@{/flights(sortBy='status', sortDir=${sortBy == 'status' ? reverseSortDir : 'asc'})}"
+                                       class="sortable" th:classappend="${sortBy == 'status' ? 'sorted-text' : ''}">
+                                        Status
+                                        <span th:if="${sortBy == 'status'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
+                                    </a>
+                                </th>
+
                                 <th scope="col" class="text-end pe-3">Actions</th>
                             </tr>
                             </thead>

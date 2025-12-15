@@ -6,6 +6,7 @@ import com.example.flightmanagementsystem.model.FlightAssignment;
 import com.example.flightmanagementsystem.repository.AirlineEmployeeRepository;
 import com.example.flightmanagementsystem.repository.FlightAssignmentRepository;
 import com.example.flightmanagementsystem.repository.FlightRepository;
+import org.springframework.data.domain.Sort; // IMPORT NOU
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -27,12 +28,9 @@ public class FlightAssignmentService {
     }
 
     private void validateRules(FlightAssignment fa, String currentId) {
-        // 1. ID Unic
         if (currentId == null && repo.existsById(fa.getId())) {
             throw new IllegalArgumentException("Assignment ID " + fa.getId() + " already exists.");
         }
-
-        // 2. Dublă Alocare (Același om pe același zbor)
         boolean exists;
         String fId = fa.getFlight().getId();
         String eId = fa.getEmployee().getId();
@@ -48,7 +46,6 @@ public class FlightAssignmentService {
         }
     }
 
-    // CREATE
     public FlightAssignment createAssignment(FlightAssignment fa, String flightId, String employeeId) {
         Flight flight = flightRepo.findById(flightId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Flight ID"));
@@ -62,7 +59,6 @@ public class FlightAssignmentService {
         return repo.save(fa);
     }
 
-    // UPDATE
     public void updateAssignment(String id, FlightAssignment fa, String flightId, String employeeId) {
         Flight flight = flightRepo.findById(flightId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Flight ID"));
@@ -82,5 +78,10 @@ public class FlightAssignmentService {
     public Optional<FlightAssignment> findById(String id) { return repo.findById(id); }
     public void delete(String id) {
         if(repo.existsById(id)) repo.deleteById(id);
+    }
+
+    // METODA NOUĂ PENTRU SORTARE
+    public List<FlightAssignment> findAll(Sort sort) {
+        return repo.findAll(sort);
     }
 }

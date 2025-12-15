@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <title>Airline Employees | Flight Management System</title>
 
-    <link
-            href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css"
-            rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
     <style>
         body {
@@ -15,10 +13,7 @@
             color: #e5e7eb;
         }
 
-        .page-wrapper {
-            padding-top: 4rem;
-            padding-bottom: 4rem;
-        }
+        .page-wrapper { padding-top: 4rem; padding-bottom: 4rem; }
 
         .card-main {
             background-color: #020617;
@@ -27,15 +22,8 @@
             box-shadow: 0 24px 60px rgba(15, 23, 42, 0.8);
         }
 
-        .navbar-brand {
-            font-weight: 600;
-            letter-spacing: .06em;
-            color: #cbd5f5 !important;
-        }
-
-        .btn-primary {
-            border-radius: 999px;
-        }
+        .navbar-brand { font-weight: 600; letter-spacing: .06em; color: #cbd5f5 !important; }
+        .btn-primary { border-radius: 999px; }
 
         .badge-id {
             background: rgba(15, 23, 42, .9);
@@ -43,9 +31,7 @@
             font-size: 0.7rem;
         }
 
-        .table thead {
-            background: rgba(15, 23, 42, 0.9);
-        }
+        .table thead { background: rgba(15, 23, 42, 0.9); }
 
         .status-pill {
             padding: 0.2rem 0.75rem;
@@ -55,32 +41,51 @@
             letter-spacing: .05em;
         }
 
-        .role-PILOT,
-        .role_CAPTAIN { background: rgba(59, 130, 246, .18); color: #93c5fd; }
-        .role_COPILOT { background: rgba(56, 189, 248, .18); color: #67e8f9; }
-        .role_ATTENDANT,
-        .role_CREW  { background: rgba(34, 197, 94, .18); color: #6ee7b7; }
+        .role-PILOT { background: rgba(59, 130, 246, .18); color: #93c5fd; }
+        .role-CO_PILOT { background: rgba(56, 189, 248, .18); color: #67e8f9; }
+        .role-FLIGHT_ATTENDANT { background: rgba(34, 197, 94, .18); color: #6ee7b7; }
+        .role-GROUND_STAFF { background: rgba(168, 85, 247, .18); color: #d8b4fe; }
 
-        a.btn-link-light {
-            color: #e5e7eb;
+        /* --- STILURI PENTRU SORTARE --- */
+        .sortable {
+            color: #cbd5e1;
             text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            cursor: pointer;
         }
-        a.btn-link-light:hover {
-            color: #ffffff;
-            text-decoration: underline;
+        .sortable:hover { color: #fff; }
+
+        .sort-icon {
+            width: 0;
+            height: 0;
+            border-style: solid;
+            opacity: 0.7;
         }
+
+        /* Săgeată SUS (Ascending) */
+        .sort-up {
+            border-width: 0 4px 6px 4px;
+            border-color: transparent transparent #60a5fa transparent;
+        }
+
+        /* Săgeată JOS (Descending) */
+        .sort-down {
+            border-width: 6px 4px 0 4px;
+            border-color: #60a5fa transparent transparent transparent;
+        }
+
+        /* Textul coloanei active la sortare */
+        .sorted-text { color: #60a5fa; font-weight: 700; }
     </style>
 </head>
 <body>
 
 <nav class="navbar navbar-dark bg-transparent px-4 pt-3">
     <div class="d-flex align-items-center gap-3">
-        <a href="/" class="btn btn-outline-light btn-sm rounded-pill px-3">
-            ⬅ Dashboard
-        </a>
-        <a class="navbar-brand" href="#">
-            Airline Employees
-        </a>
+        <a href="/" class="btn btn-outline-light btn-sm rounded-pill px-3">⬅ Dashboard</a>
+        <a class="navbar-brand" href="#">Airline Employees</a>
     </div>
 </nav>
 
@@ -90,14 +95,10 @@
             <div class="card card-main">
                 <div class="card-header border-0 pb-0 pt-4 px-4 d-flex justify-content-between align-items-center">
                     <div>
-                        <h3 class="mb-1 text-light">Airline employees</h3>
-                        <p class="text-muted mb-0" style="font-size: 0.9rem;">
-                            Manage pilots, crew and other airline staff.
-                        </p>
+                        <h3 class="mb-1 text-light">Airline Employees</h3>
+                        <p class="text-muted mb-0" style="font-size: 0.9rem;">Manage pilots, crew and other airline staff.</p>
                     </div>
-                    <a href="/airline-employees/new" class="btn btn-primary btn-sm">
-                        + New Airline Employee
-                    </a>
+                    <a href="/airline-employees/new" class="btn btn-primary btn-sm">+ New Airline Employee</a>
                 </div>
 
                 <div class="card-body px-4 pb-4 pt-3">
@@ -109,10 +110,50 @@
                         <table class="table table-dark table-borderless align-middle mb-0">
                             <thead>
                             <tr>
-                                <th scope="col">Employee</th>
-                                <th scope="col">Role</th>
-                                <th scope="col">License</th>
-                                <th scope="col">Registered</th>
+                                <th scope="col">
+                                    <a th:href="@{/airline-employees(sortBy='name', sortDir=${sortBy == 'name' ? reverseSortDir : 'asc'})}"
+                                       class="sortable"
+                                       th:classappend="${sortBy == 'name' ? 'sorted-text' : ''}">
+                                        Employee
+                                        <span th:if="${sortBy == 'name'}"
+                                              th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}"
+                                              class="sort-icon"></span>
+                                    </a>
+                                </th>
+
+                                <th scope="col">
+                                    <a th:href="@{/airline-employees(sortBy='role', sortDir=${sortBy == 'role' ? reverseSortDir : 'asc'})}"
+                                       class="sortable"
+                                       th:classappend="${sortBy == 'role' ? 'sorted-text' : ''}">
+                                        Role
+                                        <span th:if="${sortBy == 'role'}"
+                                              th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}"
+                                              class="sort-icon"></span>
+                                    </a>
+                                </th>
+
+                                <th scope="col">
+                                    <a th:href="@{/airline-employees(sortBy='licenseNumber', sortDir=${sortBy == 'licenseNumber' ? reverseSortDir : 'asc'})}"
+                                       class="sortable"
+                                       th:classappend="${sortBy == 'licenseNumber' ? 'sorted-text' : ''}">
+                                        License
+                                        <span th:if="${sortBy == 'licenseNumber'}"
+                                              th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}"
+                                              class="sort-icon"></span>
+                                    </a>
+                                </th>
+
+                                <th scope="col">
+                                    <a th:href="@{/airline-employees(sortBy='registrationDate', sortDir=${sortBy == 'registrationDate' ? reverseSortDir : 'asc'})}"
+                                       class="sortable"
+                                       th:classappend="${sortBy == 'registrationDate' ? 'sorted-text' : ''}">
+                                        Registered
+                                        <span th:if="${sortBy == 'registrationDate'}"
+                                              th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}"
+                                              class="sort-icon"></span>
+                                    </a>
+                                </th>
+
                                 <th scope="col" class="text-end">Actions</th>
                             </tr>
                             </thead>
@@ -121,54 +162,38 @@
                                 <td>
                                     <div class="d-flex flex-column">
                                         <span class="fw-semibold" th:text="${emp.name}"></span>
-                                        <span class="badge badge-id mt-1"
-                                              th:text="'ID: ' + ${emp.id}"></span>
+                                        <span class="badge badge-id mt-1" th:text="'ID: ' + ${emp.id}"></span>
                                     </div>
                                 </td>
                                 <td>
                                     <span class="status-pill"
-                                          th:classappend="' role-' + ${emp.role}"
-                                          th:text="${emp.role != null ? emp.role.name() : 'N/A'}">
+                                          th:classappend="'role-' + ${emp.role}"
+                                          th:text="${emp.role}">
                                     </span>
                                 </td>
                                 <td>
-                                    <span th:text="${emp.licenseNumber}">-</span>
+                                    <span class="text-light opacity-75" th:text="${emp.licenseNumber}"></span>
                                 </td>
                                 <td>
-                                    <span th:text="${emp.registrationDate != null ?
-                                        #temporals.format(emp.registrationDate,'yyyy-MM-dd') : '-'}"></span>
+                                    <span th:text="${#temporals.format(emp.registrationDate,'yyyy-MM-dd')}"></span>
                                 </td>
                                 <td class="text-end">
-                                    <a th:href="@{'/airline-employees/' + ${emp.id} + '/details'}"
-                                       class="btn btn-sm btn-outline-light me-1">
-                                        Details
-                                    </a>
-                                    <a th:href="@{'/airline-employees/' + ${emp.id} + '/edit'}"
-                                       class="btn btn-sm btn-outline-primary me-1">
-                                        Edit
-                                    </a>
-                                    <form th:action="@{'/airline-employees/' + ${emp.id} + '/delete'}"
-                                          method="post"
-                                          style="display:inline;">
-                                        <button type="submit"
-                                                class="btn btn-sm btn-outline-danger"
-                                                onclick="return confirm('Delete this employee?');">
-                                            Delete
-                                        </button>
+                                    <a th:href="@{'/airline-employees/' + ${emp.id} + '/details'}" class="btn btn-sm btn-outline-light me-1">Details</a>
+                                    <a th:href="@{'/airline-employees/' + ${emp.id} + '/edit'}" class="btn btn-sm btn-outline-primary me-1">Edit</a>
+                                    <form th:action="@{'/airline-employees/' + ${emp.id} + '/delete'}" method="post" style="display:inline;">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger" onclick="return confirm('Delete this employee?');">Delete</button>
                                     </form>
                                 </td>
                             </tr>
                             </tbody>
                         </table>
                     </div>
-
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<script
-        src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -3,10 +3,13 @@ package com.example.flightmanagementsystem.controller;
 import com.example.flightmanagementsystem.model.NoticeBoard;
 import com.example.flightmanagementsystem.service.NoticeBoardService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Sort; // IMPORT
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/noticeboards")
@@ -18,9 +21,26 @@ public class NoticeBoardController {
         this.service = service;
     }
 
+    // --- METODA MODIFICATĂ PENTRU SORTARE ---
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("noticeboards", service.findAll());
+    public String list(
+            Model model,
+            @RequestParam(defaultValue = "date") String sortBy, // Implicit cronologic
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Sort sort = sortDir.equalsIgnoreCase("asc") ?
+                Sort.by(sortBy).ascending() :
+                Sort.by(sortBy).descending();
+
+        List<NoticeBoard> noticeboards = service.findAll(sort);
+
+        model.addAttribute("noticeboards", noticeboards);
+
+        // Parametrii pentru View
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");
+
         return "noticeboards/index";
     }
 

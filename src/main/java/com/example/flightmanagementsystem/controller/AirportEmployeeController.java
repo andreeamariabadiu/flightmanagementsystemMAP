@@ -5,10 +5,13 @@ import com.example.flightmanagementsystem.model.Department;
 import com.example.flightmanagementsystem.model.Designation;
 import com.example.flightmanagementsystem.service.AirportEmployeeService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Sort; // IMPORT
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/airport-employees")
@@ -20,16 +23,32 @@ public class AirportEmployeeController {
         this.service = service;
     }
 
+    // --- METODA MODIFICATĂ PENTRU SORTARE ---
     @GetMapping
-    public String list(Model model) {
-        model.addAttribute("employees", service.findAll());
+    public String list(
+            Model model,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Sort sort = sortDir.equalsIgnoreCase("asc") ?
+                Sort.by(sortBy).ascending() :
+                Sort.by(sortBy).descending();
+
+        List<AirportEmployee> employees = service.findAll(sort);
+
+        model.addAttribute("employees", employees);
+
+        // Parametrii pentru View
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");
+
         return "airportemployee/index";
     }
 
     @GetMapping("/new")
     public String createForm(Model model) {
         model.addAttribute("airportEmployee", new AirportEmployee());
-        // Trimitem Enum-urile pentru Dropdown
         model.addAttribute("designations", Designation.values());
         model.addAttribute("departments", Department.values());
         return "airportemployee/form";

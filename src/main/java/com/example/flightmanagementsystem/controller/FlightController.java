@@ -6,10 +6,13 @@ import com.example.flightmanagementsystem.service.AirplaneService;
 import com.example.flightmanagementsystem.service.FlightService;
 import com.example.flightmanagementsystem.service.NoticeBoardService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Sort; // IMPORT NOU
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/flights")
@@ -19,7 +22,6 @@ public class FlightController {
     private final AirplaneService airplaneService;
     private final NoticeBoardService noticeBoardService;
 
-    // Injectăm toate service-urile necesare pentru a popula Dropdown-urile
     public FlightController(FlightService flightService,
                             AirplaneService airplaneService,
                             NoticeBoardService noticeBoardService) {
@@ -28,35 +30,47 @@ public class FlightController {
         this.noticeBoardService = noticeBoardService;
     }
 
-    // Listare
+    // --- METODA MODIFICATĂ PENTRU SORTARE ---
     @GetMapping
-    public String listFlights(Model model) {
-        model.addAttribute("flights", flightService.findAll());
+    public String listFlights(
+            Model model,
+            @RequestParam(defaultValue = "departureTime") String sortBy, // Implicit: cronologic
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Sort sort = sortDir.equalsIgnoreCase("asc") ?
+                Sort.by(sortBy).ascending() :
+                Sort.by(sortBy).descending();
+
+        List<Flight> flights = flightService.findAll(sort);
+
+        model.addAttribute("flights", flights);
+
+        // Parametrii pentru View
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");
+
         return "flight/index";
     }
 
-    // Formular Creare
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("flight", new Flight());
         model.addAttribute("statuses", Status.values());
-        // Trimitem listele pentru <select>
         model.addAttribute("airplanes", airplaneService.findAll());
         model.addAttribute("noticeBoards", noticeBoardService.findAll());
         return "flight/form";
     }
 
-    // Procesare Creare
     @PostMapping
     public String createFlight(
             @Valid @ModelAttribute("flight") Flight flight,
             BindingResult bindingResult,
-            @RequestParam("airplaneId") String airplaneId,     // ID din Dropdown
-            @RequestParam("noticeBoardId") String noticeBoardId, // ID din Dropdown
+            @RequestParam("airplaneId") String airplaneId,
+            @RequestParam("noticeBoardId") String noticeBoardId,
             Model model
     ) {
         if (bindingResult.hasErrors()) {
-            // Dacă sunt erori, retrimitem listele ca să nu dispară dropdown-urile
             model.addAttribute("statuses", Status.values());
             model.addAttribute("airplanes", airplaneService.findAll());
             model.addAttribute("noticeBoards", noticeBoardService.findAll());
@@ -76,22 +90,16 @@ public class FlightController {
         return "redirect:/flights";
     }
 
-    // Formular Editare
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable String id, Model model) {
-        Flight f = flightService.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
-
+        Flight f = flightService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
         model.addAttribute("flight", f);
         model.addAttribute("statuses", Status.values());
-        // Listele sunt necesare și la editare
         model.addAttribute("airplanes", airplaneService.findAll());
         model.addAttribute("noticeBoards", noticeBoardService.findAll());
-
         return "flight/form";
     }
 
-    // Procesare Editare
     @PostMapping("/{id}")
     public String updateFlight(
             @PathVariable String id,
@@ -121,18 +129,15 @@ public class FlightController {
         return "redirect:/flights";
     }
 
-    // Ștergere
     @PostMapping("/{id}/delete")
     public String deleteFlight(@PathVariable String id) {
         flightService.delete(id);
         return "redirect:/flights";
     }
 
-    // Detalii
     @GetMapping("/{id}/details")
     public String showDetails(@PathVariable String id, Model model) {
-        Flight f = flightService.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
+        Flight f = flightService.findById(id).orElseThrow(() -> new IllegalArgumentException("Invalid id " + id));
         model.addAttribute("flight", f);
         return "flight/details";
     }

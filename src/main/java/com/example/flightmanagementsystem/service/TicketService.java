@@ -6,6 +6,7 @@ import com.example.flightmanagementsystem.model.Ticket;
 import com.example.flightmanagementsystem.repository.FlightRepository;
 import com.example.flightmanagementsystem.repository.PassengerRepository;
 import com.example.flightmanagementsystem.repository.TicketRepository;
+import org.springframework.data.domain.Sort; // IMPORT
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -26,15 +27,11 @@ public class TicketService {
         this.passengerRepository = passengerRepository;
     }
 
-    // --- BUSINESS LOGIC ---
     private void validateBusinessRules(Ticket ticket, String currentId) {
-        // 1. ID Unic
         if (currentId == null && ticketRepository.existsById(ticket.getId())) {
             throw new IllegalArgumentException("Ticket ID " + ticket.getId() + " already exists.");
         }
 
-        // 2. Verificare Scaun Ocupat (Double Booking)
-        // Accesăm ID-ul zborului prin obiect: ticket.getFlight().getId()
         boolean seatTaken;
         String flightId = ticket.getFlight().getId();
         String seat = ticket.getSeatNumber();
@@ -50,17 +47,13 @@ public class TicketService {
         }
     }
 
-    // CREATE
     public Ticket createTicket(Ticket ticket, String flightId, String passengerId) {
-        // 1. Găsim Zborul
         Flight flight = flightRepository.findById(flightId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Flight ID: " + flightId));
 
-        // 2. Găsim Pasagerul
         Passenger passenger = passengerRepository.findById(passengerId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Passenger ID: " + passengerId));
 
-        // 3. Setăm relațiile
         ticket.setFlight(flight);
         ticket.setPassenger(passenger);
 
@@ -68,7 +61,6 @@ public class TicketService {
         return ticketRepository.save(ticket);
     }
 
-    // UPDATE
     public void updateTicket(String id, Ticket update, String flightId, String passengerId) {
         Flight flight = flightRepository.findById(flightId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Flight ID"));
@@ -84,7 +76,6 @@ public class TicketService {
         ticketRepository.save(update);
     }
 
-    // CRUD
     public boolean delete(String id) {
         if (ticketRepository.existsById(id)) {
             ticketRepository.deleteById(id);
@@ -93,6 +84,15 @@ public class TicketService {
         return false;
     }
 
-    public List<Ticket> findAll() { return ticketRepository.findAll(); }
     public Optional<Ticket> findById(String id) { return ticketRepository.findById(id); }
+
+    // --- METODE PENTRU SORTARE ---
+
+    // 1. Folosită de DataInitializer
+    public List<Ticket> findAll() { return ticketRepository.findAll(); }
+
+    // 2. Folosită de Controller pentru Sortare
+    public List<Ticket> findAll(Sort sort) {
+        return ticketRepository.findAll(sort);
+    }
 }

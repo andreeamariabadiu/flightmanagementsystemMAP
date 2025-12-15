@@ -3,10 +3,13 @@ package com.example.flightmanagementsystem.controller;
 import com.example.flightmanagementsystem.model.Airplane;
 import com.example.flightmanagementsystem.service.AirplaneService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/airplanes")
@@ -19,8 +22,23 @@ public class AirplaneController {
     }
 
     @GetMapping
-    public String listAirplanes(Model model) {
-        model.addAttribute("airplanes", airplaneService.findAll());
+    public String listAirplanes(
+            Model model,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Sort sort = sortDir.equalsIgnoreCase("asc") ?
+                Sort.by(sortBy).ascending() :
+                Sort.by(sortBy).descending();
+
+        List<Airplane> airplanes = airplaneService.findAll(sort);
+
+        model.addAttribute("airplanes", airplanes);
+
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");
+
         return "airplane/index";
     }
 

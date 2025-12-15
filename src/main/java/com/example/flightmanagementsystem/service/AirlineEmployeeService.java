@@ -2,6 +2,7 @@ package com.example.flightmanagementsystem.service;
 
 import com.example.flightmanagementsystem.model.AirlineEmployee;
 import com.example.flightmanagementsystem.repository.AirlineEmployeeRepository;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
@@ -15,11 +16,9 @@ public class AirlineEmployeeService {
     }
 
     private void validateRules(AirlineEmployee emp, String currentId) {
-        // 1. ID Unic
         if (currentId == null && repository.existsById(emp.getId())) {
             throw new IllegalArgumentException("Employee ID " + emp.getId() + " is already in use.");
         }
-        // 2. Licență Unică
         boolean licenseExists;
         if (currentId == null) {
             licenseExists = repository.existsByLicenseNumber(emp.getLicenseNumber());
@@ -37,7 +36,6 @@ public class AirlineEmployeeService {
     }
 
     public void update(String id, AirlineEmployee update) {
-        // Păstrăm referința la ID
         update.setId(id);
         validateRules(update, id);
         repository.save(update);
@@ -51,6 +49,17 @@ public class AirlineEmployeeService {
         return false;
     }
 
-    public List<AirlineEmployee> findAll() { return repository.findAll(); }
     public Optional<AirlineEmployee> findById(String id) { return repository.findById(id); }
+
+    // --- FIX AICI: Avem nevoie de ambele metode ---
+
+    // 1. Metoda folosită de Controller pentru sortare
+    public List<AirlineEmployee> findAll(Sort sort) {
+        return repository.findAll(sort);
+    }
+
+    // 2. Metoda folosită de DataInitializer (fără parametri) - REPARĂ EROAREA
+    public List<AirlineEmployee> findAll() {
+        return repository.findAll();
+    }
 }

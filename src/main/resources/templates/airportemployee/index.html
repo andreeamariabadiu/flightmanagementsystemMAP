@@ -13,6 +13,14 @@
         .table thead { background: rgba(15, 23, 42, 0.9); }
         .badge-id { background: rgba(148, 163, 184, 0.15); border: 1px solid rgba(148, 163, 184, 0.3); color: #cbd5e1; font-size: 0.75rem; padding: 0.2em 0.5em; border-radius: 4px; }
         .dept-pill { background: rgba(168, 85, 247, .15); color: #d8b4fe; border: 1px solid rgba(168, 85, 247, .3); padding: 0.2rem 0.6rem; border-radius: 6px; font-size: 0.85rem; font-weight: 600; }
+
+        /* Sort Styles */
+        .sortable { color: #cbd5e1; text-decoration: none; display: inline-flex; align-items: center; gap: 5px; cursor: pointer; }
+        .sortable:hover { color: #fff; }
+        .sort-icon { width: 0; height: 0; border-style: solid; opacity: 0.7; }
+        .sort-up { border-width: 0 4px 6px 4px; border-color: transparent transparent #60a5fa transparent; }
+        .sort-down { border-width: 6px 4px 0 4px; border-color: #60a5fa transparent transparent transparent; }
+        .sorted-text { color: #60a5fa; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -36,9 +44,30 @@
                         <table class="table table-dark table-borderless align-middle mb-0">
                             <thead>
                             <tr>
-                                <th scope="col" class="ps-3">Name</th>
-                                <th scope="col">Department</th>
-                                <th scope="col">Designation</th>
+                                <th scope="col" class="ps-3">
+                                    <a th:href="@{/airport-employees(sortBy='name', sortDir=${sortBy == 'name' ? reverseSortDir : 'asc'})}"
+                                       class="sortable" th:classappend="${sortBy == 'name' ? 'sorted-text' : ''}">
+                                        Name
+                                        <span th:if="${sortBy == 'name'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
+                                    </a>
+                                </th>
+
+                                <th scope="col">
+                                    <a th:href="@{/airport-employees(sortBy='department', sortDir=${sortBy == 'department' ? reverseSortDir : 'asc'})}"
+                                       class="sortable" th:classappend="${sortBy == 'department' ? 'sorted-text' : ''}">
+                                        Department
+                                        <span th:if="${sortBy == 'department'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
+                                    </a>
+                                </th>
+
+                                <th scope="col">
+                                    <a th:href="@{/airport-employees(sortBy='designation', sortDir=${sortBy == 'designation' ? reverseSortDir : 'asc'})}"
+                                       class="sortable" th:classappend="${sortBy == 'designation' ? 'sorted-text' : ''}">
+                                        Designation
+                                        <span th:if="${sortBy == 'designation'}" th:classappend="${sortDir == 'asc' ? 'sort-up' : 'sort-down'}" class="sort-icon"></span>
+                                    </a>
+                                </th>
+
                                 <th scope="col" class="text-end pe-3">Actions</th>
                             </tr>
                             </thead>

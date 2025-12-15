@@ -5,10 +5,13 @@ import com.example.flightmanagementsystem.service.AirlineEmployeeService;
 import com.example.flightmanagementsystem.service.FlightAssignmentService;
 import com.example.flightmanagementsystem.service.FlightService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Sort; // IMPORT NOU
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/flight-assignments")
@@ -26,16 +29,32 @@ public class FlightAssignmentController {
         this.employeeService = employeeService;
     }
 
+    // METODĂ ACTUALIZATĂ PENTRU SORTARE
     @GetMapping
-    public String listAssignments(Model model) {
-        model.addAttribute("flightAssignments", flightAssignmentService.findAll());
+    public String listAssignments(
+            Model model,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Sort sort = sortDir.equalsIgnoreCase("asc") ?
+                Sort.by(sortBy).ascending() :
+                Sort.by(sortBy).descending();
+
+        List<FlightAssignment> assignments = flightAssignmentService.findAll(sort);
+
+        model.addAttribute("flightAssignments", assignments);
+
+        // Parametrii pentru View
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");
+
         return "flightassignment/index";
     }
 
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("flightAssignment", new FlightAssignment());
-        // Trimitem listele pentru Dropdown-uri
         model.addAttribute("flights", flightService.findAll());
         model.addAttribute("employees", employeeService.findAll());
         return "flightassignment/form";

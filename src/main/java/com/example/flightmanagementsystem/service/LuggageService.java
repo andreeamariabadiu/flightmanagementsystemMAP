@@ -4,6 +4,7 @@ import com.example.flightmanagementsystem.model.Luggage;
 import com.example.flightmanagementsystem.model.Ticket;
 import com.example.flightmanagementsystem.repository.LuggageRepository;
 import com.example.flightmanagementsystem.repository.TicketRepository;
+import org.springframework.data.domain.Sort; // IMPORT
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -21,26 +22,21 @@ public class LuggageService {
     }
 
     private void validateRules(Luggage luggage, String currentId) {
-        // Regula: ID Unic
         if (currentId == null && luggageRepository.existsById(luggage.getId())) {
             throw new IllegalArgumentException("Luggage ID " + luggage.getId() + " already exists.");
         }
     }
 
-    // CREATE
     public Luggage createLuggage(Luggage luggage, String ticketId) {
-        // 1. Găsim biletul părintelui
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Ticket ID: " + ticketId));
 
-        // 2. Atașăm biletul la bagaj
         luggage.setTicket(ticket);
 
         validateRules(luggage, null);
         return luggageRepository.save(luggage);
     }
 
-    // UPDATE
     public void updateLuggage(String id, Luggage updated, String ticketId) {
         Ticket ticket = ticketRepository.findById(ticketId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Ticket ID"));
@@ -52,7 +48,6 @@ public class LuggageService {
         luggageRepository.save(updated);
     }
 
-    // STANDARD
     public boolean delete(String id) {
         if (luggageRepository.existsById(id)) {
             luggageRepository.deleteById(id);
@@ -61,6 +56,15 @@ public class LuggageService {
         return false;
     }
 
-    public List<Luggage> findAll() { return luggageRepository.findAll(); }
     public Optional<Luggage> findById(String id) { return luggageRepository.findById(id); }
+
+    // --- METODE PENTRU SORTARE ---
+
+    // 1. Folosită de DataInitializer
+    public List<Luggage> findAll() { return luggageRepository.findAll(); }
+
+    // 2. Folosită de Controller pentru Sortare
+    public List<Luggage> findAll(Sort sort) {
+        return luggageRepository.findAll(sort);
+    }
 }

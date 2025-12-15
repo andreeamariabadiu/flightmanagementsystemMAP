@@ -3,10 +3,13 @@ package com.example.flightmanagementsystem.controller;
 import com.example.flightmanagementsystem.model.Passenger;
 import com.example.flightmanagementsystem.service.PassengerService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Sort; // IMPORT
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/passengers")
@@ -18,21 +21,35 @@ public class PassengerController {
         this.passengerService = passengerService;
     }
 
-    // 1. Listare
+    // --- METODA MODIFICATĂ PENTRU SORTARE ---
     @GetMapping
-    public String listPassengers(Model model) {
-        model.addAttribute("passengers", passengerService.findAll());
+    public String listPassengers(
+            Model model,
+            @RequestParam(defaultValue = "name") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Sort sort = sortDir.equalsIgnoreCase("asc") ?
+                Sort.by(sortBy).ascending() :
+                Sort.by(sortBy).descending();
+
+        List<Passenger> passengers = passengerService.findAll(sort);
+
+        model.addAttribute("passengers", passengers);
+
+        // Parametrii pentru View
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");
+
         return "passenger/index";
     }
 
-    // 2. Formular Creare
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("passenger", new Passenger());
         return "passenger/form";
     }
 
-    // 3. Procesare Creare
     @PostMapping
     public String createPassenger(
             @Valid @ModelAttribute("passenger") Passenger passenger,
@@ -41,18 +58,15 @@ public class PassengerController {
         if (bindingResult.hasErrors()) {
             return "passenger/form";
         }
-
         try {
             passengerService.save(passenger);
         } catch (IllegalArgumentException e) {
             bindingResult.reject("global.error", e.getMessage());
             return "passenger/form";
         }
-
         return "redirect:/passengers";
     }
 
-    // 4. Formular Editare
     @GetMapping("/{id}/edit")
     public String showEditForm(@PathVariable String id, Model model) {
         Passenger p = passengerService.findById(id)
@@ -61,7 +75,6 @@ public class PassengerController {
         return "passenger/form";
     }
 
-    // 5. Procesare Editare
     @PostMapping("/{id}")
     public String updatePassenger(
             @PathVariable String id,
@@ -71,25 +84,21 @@ public class PassengerController {
         if (bindingResult.hasErrors()) {
             return "passenger/form";
         }
-
         try {
             passengerService.updatePassenger(id, passenger);
         } catch (IllegalArgumentException e) {
             bindingResult.reject("global.error", e.getMessage());
             return "passenger/form";
         }
-
         return "redirect:/passengers";
     }
 
-    // 6. Ștergere
     @PostMapping("/{id}/delete")
     public String deletePassenger(@PathVariable String id) {
         passengerService.delete(id);
         return "redirect:/passengers";
     }
 
-    // 7. Detalii
     @GetMapping("/{id}/details")
     public String showDetails(@PathVariable String id, Model model) {
         Passenger p = passengerService.findById(id)

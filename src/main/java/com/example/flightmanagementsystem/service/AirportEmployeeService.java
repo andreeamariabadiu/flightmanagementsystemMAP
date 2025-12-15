@@ -2,6 +2,7 @@ package com.example.flightmanagementsystem.service;
 
 import com.example.flightmanagementsystem.model.AirportEmployee;
 import com.example.flightmanagementsystem.repository.AirportEmployeeRepository;
+import org.springframework.data.domain.Sort; // IMPORT
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -42,6 +43,17 @@ public class AirportEmployeeService {
         return false;
     }
 
-    public List<AirportEmployee> findAll() { return repository.findAll(); }
     public Optional<AirportEmployee> findById(String id) { return repository.findById(id); }
+
+    // --- METODE PENTRU SORTARE ---
+
+    // 1. Folosită de DataInitializer (fără parametri)
+    public List<AirportEmployee> findAll() {
+        return repository.findAll();
+    }
+
+    // 2. Folosită de Controller pentru Sortare
+    public List<AirportEmployee> findAll(Sort sort) {
+        return repository.findAll(sort);
+    }
 }

@@ -5,10 +5,13 @@ import com.example.flightmanagementsystem.service.FlightService;
 import com.example.flightmanagementsystem.service.PassengerService;
 import com.example.flightmanagementsystem.service.TicketService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.Sort; // IMPORT
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @Controller
 @RequestMapping("/tickets")
@@ -26,16 +29,32 @@ public class TicketController {
         this.passengerService = passengerService;
     }
 
+    // --- METODA MODIFICATĂ PENTRU SORTARE ---
     @GetMapping
-    public String listTickets(Model model) {
-        model.addAttribute("tickets", ticketService.findAll());
+    public String listTickets(
+            Model model,
+            @RequestParam(defaultValue = "id") String sortBy,
+            @RequestParam(defaultValue = "asc") String sortDir
+    ) {
+        Sort sort = sortDir.equalsIgnoreCase("asc") ?
+                Sort.by(sortBy).ascending() :
+                Sort.by(sortBy).descending();
+
+        List<Ticket> tickets = ticketService.findAll(sort);
+
+        model.addAttribute("tickets", tickets);
+
+        // Parametrii pentru View
+        model.addAttribute("sortBy", sortBy);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("reverseSortDir", sortDir.equalsIgnoreCase("asc") ? "desc" : "asc");
+
         return "ticket/index";
     }
 
     @GetMapping("/new")
     public String showCreateForm(Model model) {
         model.addAttribute("ticket", new Ticket());
-        // Trimitem listele pentru Dropdowns
         model.addAttribute("flights", flightService.findAll());
         model.addAttribute("passengers", passengerService.findAll());
         return "ticket/form";
@@ -45,8 +64,8 @@ public class TicketController {
     public String createTicket(
             @Valid @ModelAttribute("ticket") Ticket ticket,
             BindingResult bindingResult,
-            @RequestParam("flightId") String flightId,       // Din dropdown
-            @RequestParam("passengerId") String passengerId, // Din dropdown
+            @RequestParam("flightId") String flightId,
+            @RequestParam("passengerId") String passengerId,
             Model model
     ) {
         if (bindingResult.hasErrors()) {

@@ -6,6 +6,7 @@ import com.example.flightmanagementsystem.model.NoticeBoard;
 import com.example.flightmanagementsystem.repository.AirplaneRepository;
 import com.example.flightmanagementsystem.repository.FlightRepository;
 import com.example.flightmanagementsystem.repository.NoticeBoardRepository;
+import org.springframework.data.domain.Sort; // IMPORT NOU
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,14 +26,10 @@ public class FlightService {
         this.noticeBoardRepository = noticeBoardRepository;
     }
 
-    // --- BUSINESS LOGIC ---
     private void validateBusinessRules(Flight flight, String currentId) {
-        // Regula 1: ID Unic (Doar la creare)
         if (currentId == null && flightRepository.existsById(flight.getId())) {
             throw new IllegalArgumentException("Flight ID " + flight.getId() + " is already in use.");
         }
-
-        // Regula 2: Cronologie (Plecarea înainte de Sosire)
         if (flight.getDepartureTime() != null && flight.getArrivalTime() != null) {
             if (flight.getArrivalTime().isBefore(flight.getDepartureTime())) {
                 throw new IllegalArgumentException("Arrival time cannot be before Departure time.");
@@ -43,35 +40,27 @@ public class FlightService {
         }
     }
 
-    // --- CREATE ---
     public Flight createFlight(Flight flight, String airplaneId, String noticeBoardId) {
-
-        // 1. Căutăm și setăm Avionul
         Airplane realPlane = airplaneRepository.findById(airplaneId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Airplane ID: " + airplaneId));
         flight.setAirplane(realPlane);
 
-        // 2. Căutăm și setăm NoticeBoard-ul
         NoticeBoard realBoard = noticeBoardRepository.findById(noticeBoardId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid NoticeBoard ID: " + noticeBoardId));
         flight.setNoticeBoard(realBoard);
 
-        // 3. Validăm regulile de business
         validateBusinessRules(flight, null);
-
         return flightRepository.save(flight);
     }
 
-    // --- UPDATE ---
     public void updateFlight(String id, Flight update, String airplaneId, String noticeBoardId) {
-        // La update, trebuie să re-căutăm relațiile, deoarece userul le putea schimba în formular
         Airplane realPlane = airplaneRepository.findById(airplaneId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid Airplane ID: " + airplaneId));
 
         NoticeBoard realBoard = noticeBoardRepository.findById(noticeBoardId)
                 .orElseThrow(() -> new IllegalArgumentException("Invalid NoticeBoard ID: " + noticeBoardId));
 
-        update.setId(id); // Ne asigurăm că păstrăm ID-ul original
+        update.setId(id);
         update.setAirplane(realPlane);
         update.setNoticeBoard(realBoard);
 
@@ -79,7 +68,6 @@ public class FlightService {
         flightRepository.save(update);
     }
 
-    // --- STANDARD CRUD ---
     public boolean delete(String id) {
         if (flightRepository.existsById(id)) {
             flightRepository.deleteById(id);
@@ -88,11 +76,15 @@ public class FlightService {
         return false;
     }
 
-    public List<Flight> findAll() {
-        return flightRepository.findAll();
-    }
+    public Optional<Flight> findById(String id) { return flightRepository.findById(id); }
 
-    public Optional<Flight> findById(String id) {
-        return flightRepository.findById(id);
+    // --- METODE PENTRU SORTARE ---
+
+    // 1. Folosită de DataInitializer
+    public List<Flight> findAll() { return flightRepository.findAll(); }
+
+    // 2. Folosită de Controller
+    public List<Flight> findAll(Sort sort) {
+        return flightRepository.findAll(sort);
     }
 }

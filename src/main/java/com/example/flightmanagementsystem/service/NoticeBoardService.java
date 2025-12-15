@@ -2,9 +2,13 @@ package com.example.flightmanagementsystem.service;
 
 import com.example.flightmanagementsystem.model.NoticeBoard;
 import com.example.flightmanagementsystem.repository.NoticeBoardRepository;
+import org.springframework.data.domain.Sort; // IMPORT
 import org.springframework.stereotype.Service;
+
+import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class NoticeBoardService {
@@ -43,6 +47,33 @@ public class NoticeBoardService {
         }
         return false;
     }
-    public List<NoticeBoard> findAll() { return repository.findAll(); }
+
     public Optional<NoticeBoard> findById(String id) { return repository.findById(id); }
+
+    // --- METODE PENTRU SORTARE ---
+
+    // 1. Pentru DataInitializer
+    public List<NoticeBoard> findAll() { return repository.findAll(); }
+
+    // 2. Pentru Controller
+    public List<NoticeBoard> findAll(Sort sort) {
+        // Sortare custom după numărul de zboruri
+        if (sort.getOrderFor("flightCount") != null) {
+            List<NoticeBoard> boards = repository.findAll();
+
+            Sort.Order order = sort.getOrderFor("flightCount");
+            Comparator<NoticeBoard> comparator = Comparator.comparingInt(nb -> nb.getFlightsOfTheDay().size());
+
+            if (order.isDescending()) {
+                comparator = comparator.reversed();
+            }
+
+            return boards.stream()
+                    .sorted(comparator)
+                    .collect(Collectors.toList());
+        }
+
+        // Sortare standard DB
+        return repository.findAll(sort);
+    }
 }
